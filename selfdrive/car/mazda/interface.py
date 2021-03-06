@@ -72,6 +72,9 @@ class CarInterface(CarInterfaceBase):
     # dp
     ret = common_interface_get_params_lqr(ret)
 
+    # dp
+    ret = common_interface_get_params_lqr(ret)
+
     return ret
 
   # returns a car.CarState

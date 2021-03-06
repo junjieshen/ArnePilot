@@ -84,8 +84,9 @@ def only_toyota_left(candidate_cars):
 
 
 # **** for use live only ****
-def fingerprint(logcan, has_relay):
+def fingerprint(logcan, sendcan, has_relay):
   params = Params()
+  car_selected = params.get('dp_car_selected', encoding='utf8')
   car_detected = params.get('dp_car_detected', encoding='utf8')
   cached_params = params.get("CarParamsCache")
   if cached_params is None and car_selected == "" and car_detected != "":
