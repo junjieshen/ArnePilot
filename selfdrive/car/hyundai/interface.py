@@ -228,11 +228,6 @@ class CarInterface(CarInterfaceBase):
       ret.minSteerSpeed = 0.
     ret = common_interface_get_params_lqr(ret)
 
-    # dp
-    if Params().get('dp_hkg_smart_mdps') == b'1':
-      ret.minSteerSpeed = 0.
-    ret = common_interface_get_params_lqr(ret)
-
     return ret
 
   def update(self, c, can_strings, dragonconf):
