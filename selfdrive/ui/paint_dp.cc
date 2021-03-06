@@ -236,9 +236,9 @@ void bb_ui_draw_measures_left(UIState *s, int bb_x, int bb_y, int bb_w ) {
   bb_ry = bb_y + bb_h;
 
   //add visual radar relative speed
-  char val_str[16];
-  char uom_str[6];
-  NVGcolor val_color = COLOR_WHITE_ALPHA(200);
+//  char val_str[16];
+//  char uom_str[6];
+//  NVGcolor val_color = COLOR_WHITE_ALPHA(200);
   if (s->scene.lead_data[0].getStatus()) {
     //show Orange if negative speed (approaching)
     //show Orange if negative speed faster than 5mph (approaching fast)
@@ -313,9 +313,9 @@ void bb_ui_draw_measures_right(UIState *s, int bb_x, int bb_y, int bb_w ) {
   bb_ry = bb_y + bb_h;
 
   //add  desired steering angle
-  char val_str[16];
-  char uom_str[6];
-  NVGcolor val_color = COLOR_WHITE_ALPHA(200);
+//  char val_str[16];
+//  char uom_str[6];
+//  NVGcolor val_color = COLOR_WHITE_ALPHA(200);
   //show Orange if more than 6 degrees
   //show red if  more than 12 degrees
   if(((int)(s->scene.angleSteersDes) < -6) || ((int)(s->scene.angleSteersDes) > 6)) {
