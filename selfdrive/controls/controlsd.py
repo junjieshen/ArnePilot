@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from cereal import car, log
-from common.numpy_fast import clip
+from common.numpy_fast import clip, interp
 from common.realtime import sec_since_boot, config_realtime_process, Priority, Ratekeeper, DT_CTRL
 from common.profiler import Profiler
 from common.params import Params, put_nonblocking
@@ -22,6 +22,9 @@ from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.longitudinal_planner import LON_MPC_STEP
 from selfdrive.locationd.calibrationd import Calibration
 from selfdrive.hardware import HARDWARE, TICI
+from common.travis_checker import travis
+#import threading
+from selfdrive.interceptor import Interceptor
 
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
 LANE_DEPARTURE_THRESHOLD = 0.1
@@ -40,6 +43,10 @@ Desire = log.LateralPlan.Desire
 LaneChangeState = log.LateralPlan.LaneChangeState
 LaneChangeDirection = log.LateralPlan.LaneChangeDirection
 EventName = car.CarEvent.EventName
+
+LEAD_AWAY_STATE_OFF = 0
+LEAD_AWAY_STATE_ON = 1
+LEAD_AWAY_STATE_ALERTED = 2
 
 
 class Controls:
@@ -60,7 +67,8 @@ class Controls:
       ignore += ['driverCameraState'] if params.get('dp_driver_monitor') == b'0' else []
       self.sm = messaging.SubMaster(['deviceState', 'pandaState', 'modelV2', 'liveCalibration', 'ubloxRaw',
                                      'driverMonitoringState', 'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
-                                     'roadCameraState', 'driverCameraState', 'managerState', 'liveParameters', 'radarState', 'dragonConf'], ignore_alive=ignore)
+                                     'roadCameraState', 'driverCameraState', 'managerState', 'liveParameters', 'radarState', 'dragonConf', 'testJoystick'], ignore_alive=ignore)
+    self.interceptor = Interceptor()
 
     self.can_sock = can_sock
     if can_sock is None:
@@ -121,13 +129,24 @@ class Controls:
     self.active = False
     self.can_rcv_error = False
     self.soft_disable_timer = 0
-    self.v_cruise_kph = 255
-    self.v_cruise_kph_last = 0
+    self.v_cruise_kph = 255.0
+    self.v_cruise_kph_last = 0.0
     self.mismatch_counter = 0
     self.can_error_counter = 0
     self.last_blinker_frame = 0
     self.saturated_count = 0
-    self.distance_traveled = 0
+    self.distance_traveled_now = 0
+    if not travis:
+      self.distance_traveled = float(params.get("DistanceTraveled", encoding='utf8'))
+      self.distance_traveled_engaged = float(params.get("DistanceTraveledEngaged", encoding='utf8'))
+      self.distance_traveled_override = float(params.get("DistanceTraveledOverride", encoding='utf8'))
+    else:
+      self.distance_traveled = 0
+      self.distance_traveled_engaged = 0
+      self.distance_traveled_override = 0
+
+    self.distance_traveled_frame = 0
+
     self.last_functional_fan_frame = 0
     self.events_prev = []
     self.current_alert_types = [ET.PERMANENT]
@@ -147,6 +166,8 @@ class Controls:
       self.events.add(EventName.communityFeatureDisallowed, static=True)
     if not car_recognized:
       self.events.add(EventName.carUnrecognized, static=True)
+    if hw_type == HwType.whitePanda:
+      self.events.add(EventName.whitePandaUnsupported, static=True)
 
     # controlsd is driven by can recv, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
@@ -205,7 +226,7 @@ class Controls:
         self.events.add(EventName.laneChangeBlocked)
       else:
         if direction == LaneChangeDirection.left:
-          self.events.add(EventName.preLaneChangeLeft)
+          self.events.add(EventName.preLaneChangeLeftALC if self.sm['pathPlan'].dpALCAllowed else EventName.preLaneChangeLeft)
         else:
           self.events.add(EventName.preLaneChangeRight)
     elif self.sm['lateralPlan'].laneChangeState in [LaneChangeState.laneChangeStarting,
@@ -268,6 +289,41 @@ class Controls:
       and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
       self.events.add(EventName.noTarget)
 
+    if self.dp_lead_away_alert:
+      current_speed = CS.vEgo * 3.6
+
+      if CS.brakePressed or current_speed < self.dp_lead_away_min_speed or self.dp_lead_away_state == LEAD_AWAY_STATE_ALERTED:
+        self.dp_lead_away_alert_lead_count = 0
+        self.dp_lead_away_alert_nolead_count = 0
+        self.dp_lead_away_state = LEAD_AWAY_STATE_OFF
+
+      if current_speed >= self.dp_lead_away_min_speed:
+        nolead_count = interp(current_speed, [self.dp_lead_away_min_speed, 100], [300, 100])
+        # when car had lead for 5 more secs and lead move away for 3 secs
+        if self.dp_lead_away_state == LEAD_AWAY_STATE_OFF and self.sm['plan'].hasLead:
+          self.dp_lead_away_alert_lead_count += 1
+        elif self.dp_lead_away_state == LEAD_AWAY_STATE_ON and not self.sm['plan'].hasLead:
+          self.dp_lead_away_alert_nolead_count += 1
+
+        if self.dp_lead_away_state == LEAD_AWAY_STATE_OFF and self.dp_lead_away_alert_lead_count >= 300:
+          self.dp_lead_away_state = LEAD_AWAY_STATE_ON
+        elif self.dp_lead_away_state == LEAD_AWAY_STATE_ON and self.dp_lead_away_alert_nolead_count >= nolead_count:
+          self.events.add(EventName.leadCarMoving)
+          self.dp_lead_away_state = LEAD_AWAY_STATE_ALERTED
+
+    # dp lead car moving alert
+    if self.sm['dragonConf'].dpLeadCarAlert:
+      if not self.CP.radarOffCan and self.sm['plan'].hasLead and CS.vEgo <= 0.01 and 0.3 >= abs(self.sm['plan'].vTarget) >= 0:
+        self.dp_lead_count += 1
+      else:
+        self.dp_lead_count = 0
+
+      if self.dp_lead_count >= 300 and abs(self.sm['plan'].vTargetFuture) >= 0.1:
+        self.events.add(EventName.leadCarMoving)
+
+      if CS.vEgo > 0. or CS.gearShifter in [car.CarState.GearShifter.reverse, car.CarState.GearShifter.park]:
+        self.dp_lead_count = 0
+
   def data_sample(self):
     """Receive data from sockets and update carState"""
 
@@ -276,6 +332,9 @@ class Controls:
     CS = self.CI.update(self.CC, can_strs, self.sm['dragonConf'])
 
     self.sm.update(0)
+
+    # Update Interceptor
+    self.interceptor.update(self.sm['testJoystick'], self.sm.logMonoTime['testJoystick'], sec_since_boot()*1e9)
 
     # Check for CAN timeout
     if not can_strs:
@@ -294,20 +353,35 @@ class Controls:
     if not self.sm['dragonConf'].dpAtl and self.sm['pandaState'].controlsAllowed and self.enabled:
       self.mismatch_counter += 1
 
+    self.distance_traveled_now += CS.vEgo * DT_CTRL
     self.distance_traveled += CS.vEgo * DT_CTRL
+    if self.enabled:
+      self.distance_traveled_engaged += CS.vEgo * DT_CTRL
+      if CS.steeringPressed:
+        self.distance_traveled_override += CS.vEgo * DT_CTRL
+    if (self.sm.frame - self.distance_traveled_frame) * DT_CTRL > 10.0 and not travis:
+      put_nonblocking("DistanceTraveled", str(round(self.distance_traveled,2)))
+      put_nonblocking("DistanceTraveledEngaged", str(round(self.distance_traveled_engaged,2)))
+      put_nonblocking("DistanceTraveledOverride", str(round(self.distance_traveled_override,2)))
+      self.distance_traveled_frame = self.sm.frame
 
     return CS
 
   def state_transition(self, CS):
     """Compute conditional state transitions and execute actions on state transitions"""
-
+    #if self.v_cruise_kph_last != self.v_cruise_kph:
+    #  print("v_cruise_kph_last = " + str(self.v_cruise_kph_last) + " v_cruise_kph = " + str(self.v_cruise_kph))
     self.v_cruise_kph_last = self.v_cruise_kph
 
     # if stock cruise is completely disabled, then we can use our own set speed logic
     if not self.CP.enableCruise:
+      #print("here")
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
     elif self.CP.enableCruise and CS.cruiseState.enabled:
+      #print("there")
       self.v_cruise_kph = CS.cruiseState.speed * CV.MS_TO_KPH
+      #print(" v_cruise_kph = " + str(self.v_cruise_kph))
+
 
     # decrease the soft disable timer at every step, as it's reset on
     # entrance in SOFT_DISABLING state
@@ -365,7 +439,9 @@ class Controls:
           else:
             self.state = State.enabled
           self.current_alert_types.append(ET.ENABLE)
+          #print("somewhere")
           self.v_cruise_kph = initialize_v_cruise(CS.vEgo, CS.buttonEvents, self.v_cruise_kph_last)
+          #print("self.v_cruise_kph = " + str(self.v_cruise_kph))
 
     # Check if actuators are enabled
     self.active = self.state == State.enabled or self.state == State.softDisabling
@@ -390,7 +466,7 @@ class Controls:
 
     if not self.active:
       self.LaC.reset()
-      self.LoC.reset(v_pid=CS.vEgo)
+      self.LoC.reset(v_pid=plan.vTargetFuture)
 
     long_plan_age = DT_CTRL * (self.sm.frame - self.sm.rcv_frame['longitudinalPlan'])
     # no greater than dt mpc + dt, to prevent too high extraps
@@ -400,7 +476,7 @@ class Controls:
     v_acc_sol = long_plan.vStart + dt * (a_acc_sol + long_plan.aStart) / 2.0
 
     # Gas/Brake PID loop
-    actuators.gas, actuators.brake = self.LoC.update(self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP)
+    actuators.gas, actuators.brake = self.LoC.update(self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP, long_plan.hasLead, self.sm['radarState'], long_plan.decelForTurn, long_plan.longitudinalPlanSource)
     # Steering PID loop and lateral MPC
     actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, lat_plan)
 
@@ -423,6 +499,12 @@ class Controls:
 
         if left_deviation or right_deviation:
           self.events.add(EventName.steerSaturated)
+
+    # Interceptor; (signal, index, part, scale=1.0)
+    actuators.gas = self.interceptor.override_axis(actuators.gas, 1, 'negative', .5)  # Rescale for Toyota to maxgas=0.5
+    actuators.brake = self.interceptor.override_axis(actuators.brake, 1, 'positive', 1.)
+    actuators.steer = self.interceptor.override_axis(actuators.steer, 2, 'full', -1.)  # For torque based steering
+    actuators.steerAngle = self.interceptor.override_axis(actuators.steer, 2, 'full', -45.)  # For angle based steering, limit 45 deg
 
     return actuators, v_acc_sol, a_acc_sol, lac_log
 
@@ -505,13 +587,15 @@ class Controls:
     controlsState.enabled = self.enabled
     controlsState.active = self.active
     controlsState.curvature = self.VM.calc_curvature(steer_angle_rad, CS.vEgo)
+    controlsState.decelForTurn = self.sm['long_plan'].decelForTurn
+    controlsState.steerOverride = CS.steeringPressed
     controlsState.state = self.state
     controlsState.engageable = not self.events.any(ET.NO_ENTRY)
     controlsState.longControlState = self.LoC.long_control_state
     controlsState.vPid = float(self.LoC.v_pid)
     controlsState.vCruise = float(self.v_cruise_kph)
     controlsState.upAccelCmd = float(self.LoC.pid.p)
-    controlsState.uiAccelCmd = float(self.LoC.pid.i)
+    controlsState.uiAccelCmd = float(self.LoC.pid.id)
     controlsState.ufAccelCmd = float(self.LoC.pid.f)
     controlsState.steeringAngleDesiredDeg = float(self.LaC.angle_steers_des)
     controlsState.vTargetLead = float(v_acc)

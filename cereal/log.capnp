@@ -1126,6 +1126,112 @@ struct LiveLongitudinalMpcData {
   cost @10 :Float64;
 }
 
+
+struct ECEFPointDEPRECATED @0xe10e21168db0c7f7 {
+  x @0 :Float32;
+  y @1 :Float32;
+  z @2 :Float32;
+}
+
+struct ECEFPoint @0xc25bbbd524983447 {
+  x @0 :Float64;
+  y @1 :Float64;
+  z @2 :Float64;
+}
+
+struct GPSPlannerPoints {
+  curPosDEPRECATED @0 :ECEFPointDEPRECATED;
+  pointsDEPRECATED @1 :List(ECEFPointDEPRECATED);
+  curPos @6 :ECEFPoint;
+  points @7 :List(ECEFPoint);
+  valid @2 :Bool;
+  trackName @3 :Text;
+  speedLimit @4 :Float32;
+  accelTarget @5 :Float32;
+}
+
+struct GPSPlannerPlan {
+  valid @0 :Bool;
+  poly @1 :List(Float32);
+  trackName @2 :Text;
+  speed @3 :Float32;
+  acceleration @4 :Float32;
+  pointsDEPRECATED @5 :List(ECEFPointDEPRECATED);
+  points @6 :List(ECEFPoint);
+  xLookahead @7 :Float32;
+}
+
+struct LiveTrafficData {
+  speedLimitValid @0 :Bool;
+  speedLimit @1 :Float32;
+  speedAdvisoryValid @2 :Bool;
+  speedAdvisory @3 :Float32;
+}
+
+struct TrafficEvent @0xacfa74a094e62626 {
+  type @0 :Type;
+  distance @1 :Float32;
+  action @2 :Action;
+  resuming @3 :Bool;
+
+  enum Type {
+    stopSign @0;
+    lightRed @1;
+    lightYellow @2;
+    lightGreen @3;
+    stopLight @4;
+  }
+
+  enum Action {
+    none @0;
+    yield @1;
+    stop @2;
+    resumeReady @3;
+  }
+
+}
+
+struct OrbslamCorrection {
+  correctionMonoTime @0 :UInt64;
+  prePositionECEF @1 :List(Float64);
+  postPositionECEF @2 :List(Float64);
+  prePoseQuatECEF @3 :List(Float32);
+  postPoseQuatECEF @4 :List(Float32);
+  numInliers @5 :UInt32;
+}
+
+struct OrbObservation {
+  observationMonoTime @0 :UInt64;
+  normalizedCoordinates @1 :List(Float32);
+  locationECEF @2 :List(Float64);
+  matchDistance @3: UInt32;
+}
+
+struct UiNavigationEvent {
+  type @0: Type;
+  status @1: Status;
+  distanceTo @2: Float32;
+  endRoadPointDEPRECATED @3: ECEFPointDEPRECATED;
+  endRoadPoint @4: ECEFPoint;
+
+  enum Type {
+    none @0;
+    laneChangeLeft @1;
+    laneChangeRight @2;
+    mergeLeft @3;
+    mergeRight @4;
+    turnLeft @5;
+    turnRight @6;
+  }
+
+  enum Status {
+    none @0;
+    passive @1;
+    approaching @2;
+    active @3;
+  }
+}
+
 struct UiLayoutState {
   activeApp @0 :App;
   sidebarCollapsed @1 :Bool;
@@ -1145,6 +1251,8 @@ struct Joystick {
   # convenient for debug and live tuning
   axes @0: List(Float32);
   buttons @1: List(Bool);
+  enabled @2: Bool;
+  axesMode @3: List(Text);
 }
 
 struct DriverState {
@@ -1192,6 +1300,16 @@ struct DriverMonitoringState @0xb83cda094a1da284 {
   isRHDDEPRECATED @4 :Bool;
   isPreviewDEPRECATED @15 :Bool;
   rhdCheckedDEPRECATED @5 :Bool;
+  handsOnWheelState @16 :HandsOnWheelState;
+
+  enum HandsOnWheelState {
+    none @0;          # hand on wheel monitoring inactive
+    ok @1;            # driver has hands on steering wheel
+    minor @2;         # hands off steering wheel for acceptable period
+    warning @3;       # hands off steering wheel for warning period
+    critical @4;      # # hands off steering wheel for critical period
+    terminal @5;      # # hands off steering wheel for terminal period
+  }
 }
 
 struct Boot {
@@ -1262,6 +1380,17 @@ struct ManagerState {
     running @2 :Bool;
     exitCode @3 :Int32;
   }
+struct TrafficModelRaw {
+  prediction @0 :List(Float32);
+}
+
+struct TrafficModelEvent {
+  status @0 :Text;
+  confidence @1 :Float32;
+}
+
+struct LatControl {
+  anglelater @0 :Float32;
 }
 
 struct Event {
@@ -1362,5 +1491,87 @@ struct Event {
     kalmanOdometryDEPRECATED @65 :Legacy.KalmanOdometry;
     thermal @79 :Dp.ThermalData; # dp apk
     dragonConf @80 :Dp.DragonConf;
+    liveTrafficData @81 :LiveTrafficData;
+    trafficModelRaw @82 :TrafficModelRaw;
+    trafficModelEvent @83 :TrafficModelEvent;
+    latControl @84 :LatControl;
   }
+}
+
+struct DragonConf {
+  dpThermalStarted @0 :Bool;
+  dpThermalOverheat @1 :Bool;
+  dpVw @2 :Bool;
+  dpAtl @3 :Bool;
+  dpAppWaze @4 :Bool;
+  dpAppWazeManual @5 :Int8;
+  dpAppHr @6 :Bool;
+  dpAppHrManual @7 :Int8;
+  dpDashcam @8 :Bool;
+  dpDashcamHoursStored @9 :UInt8;
+  dpAutoShutdown @10 :Bool;
+  dpAthenad @11 :Bool;
+  dpUploader @12 :Bool;
+  dpLatCtrl @13 :Bool;
+  dpSteeringLimitAlert @14 :Bool;
+  dpSteeringOnSignal @15 :Bool;
+  dpSignalOffDelay @16 :UInt8;
+  dpAssistedLcMinMph @17 :Float32;
+  dpAutoLc @18 :Bool;
+  dpAutoLcCont @19 :Bool;
+  dpAutoLcMinMph @20 :Float32;
+  dpAutoLcDelay @21 :Float32;
+  dpSlowOnCurve @22 :Bool;
+  dpAllowGas @23 :Bool;
+  dpMaxCtrlSpeed @24 :Float32;
+  dpLeadCarAlert @25 :Bool;
+  dpDynamicFollow @26 :UInt8;
+  dpAccelProfile @27 :UInt8;
+  dpDriverMonitor @28 :Bool;
+  dpSteeringMonitor @29 :Bool;
+  dpSteeringMonitorTimer @30 :UInt8;
+  dpGearCheck @31 :Bool;
+  dpDrivingUi @32 :Bool;
+  dpUiScreenOffReversing @33 :Bool;
+  dpUiScreenOffDriving @34 :Bool;
+  dpUiSpeed @35 :Bool;
+  dpUiEvent @36 :Bool;
+  dpUiMaxSpeed @37 :Bool;
+  dpUiFace @38 :Bool;
+  dpUiLane @39 :Bool;
+  dpUiPath @40 :Bool;
+  dpUiLead @41 :Bool;
+  dpUiDev @42 :Bool;
+  dpUiDevMini @43 :Bool;
+  dpUiBlinker @44 :Bool;
+  dpUiBrightness @45 :UInt8;
+  dpUiVolumeBoost @46 :Int8;
+  dpAppAutoUpdate @47 :Bool;
+  dpAppExtGps @48 :Bool;
+  dpAppTomtom @49 :Bool;
+  dpAppTomtomAuto @50 :Bool;
+  dpAppTomtomManual @51 :Int8;
+  dpAppAutonavi @52 :Bool;
+  dpAppAutonaviAuto @53 :Bool;
+  dpAppAutonaviManual @54 :Int8;
+  dpAppAegis @55 :Bool;
+  dpAppAegisAuto @56 :Bool;
+  dpAppAegisManual @57 :Int8;
+  dpAppMixplorer @58 :Bool;
+  dpAppMixplorerManual @59 :Int8;
+  dpCarDetected @60 :Text;
+  dpToyotaLdw @61 :Bool;
+  dpToyotaSng @62 :Bool;
+  dpToyotaLowestCruiseOverride @63 :Bool;
+  dpToyotaLowestCruiseOverrideVego @64 :Bool;
+  dpToyotaLowestCruiseOverrideAt @65 :Float32;
+  dpToyotaLowestCruiseOverrideSpeed @66 :Float32;
+  dpIpAddr @67 :Text;
+  dpCameraOffset @68 :Int8;
+  dpLocale @69 :Text;
+  dpChargingCtrl @70 :Bool;
+  dpChargingAt @71 :UInt8;
+  dpDischargingAt @72 :UInt8;
+  dpIsUpdating @73 :Bool;
+  dpTimebombAssist @74 :Bool;
 }

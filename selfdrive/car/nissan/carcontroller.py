@@ -22,6 +22,10 @@ class CarController():
 
     self.packer = CANPacker(dbc_name)
 
+    # dp
+    self.last_blinker_on = False
+    self.blinker_end_frame = 0.
+
   def update(self, enabled, CS, frame, actuators, cruise_cancel, hud_alert,
              left_line, right_line, left_lane_depart, right_lane_depart, dragonconf):
     """ Controls thread """

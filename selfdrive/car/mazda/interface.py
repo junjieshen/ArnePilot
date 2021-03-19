@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from cereal import car
 from selfdrive.config import Conversions as CV
-from selfdrive.car.mazda.values import CAR, LKAS_LIMITS, Ecu, ECU_FINGERPRINT, FINGERPRINTS
+from selfdrive.car.mazda.values import CAR, LKAS_LIMITS, FINGERPRINTS, ECU_FINGERPRINT, Ecu
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint, is_ecu_disconnected
 from selfdrive.car.interfaces import CarInterfaceBase
 from common.dp_common import common_interface_atl, common_interface_get_params_lqr
@@ -21,6 +21,8 @@ class CarInterface(CarInterfaceBase):
 
     ret.carName = "mazda"
     ret.safetyModel = car.CarParams.SafetyModel.mazda
+    ret.lateralTuning.init('pid')
+    ret.lateralTuning.pid.newKfTuned = False
 
     ret.dashcamOnly = True
 
@@ -30,6 +32,7 @@ class CarInterface(CarInterfaceBase):
     ret.steerRateCost = 1.0
     ret.steerLimitTimer = 0.8
     tire_stiffness_factor = 0.70   # not optimized yet
+    ret.lateralTuning.pid.kdBP, ret.lateralTuning.pid.kdV = [[0.], [0.]]
 
     if candidate == CAR.CX5:
       ret.mass = 3655 * CV.LB_TO_KG + STD_CARGO_KG
@@ -56,6 +59,9 @@ class CarInterface(CarInterfaceBase):
     # No steer below disable speed
     ret.minSteerSpeed = LKAS_LIMITS.DISABLE_SPEED * CV.KPH_TO_MS
 
+    # dp
+    ret = common_interface_get_params_lqr(ret)
+
     ret.centerToFront = ret.wheelbase * 0.41
 
     # TODO: get actual value, for now starting with reasonable value for
@@ -67,10 +73,7 @@ class CarInterface(CarInterfaceBase):
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront,
                                                                          tire_stiffness_factor=tire_stiffness_factor)
 
-    ret.enableCamera = is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay
-
-    # dp
-    ret = common_interface_get_params_lqr(ret)
+    ret.enableCamera = bool(is_ecu_disconnected(fingerprint[0], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay)
 
     return ret
 

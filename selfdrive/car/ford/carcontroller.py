@@ -23,7 +23,11 @@ class CarController():
     self.steer_alert_last = False
     self.lkas_action = 0
 
-  def update(self, enabled, CS, frame, actuators, visual_alert, pcm_cancel):
+    # dp
+    self.last_blinker_on = False
+    self.blinker_end_frame = 0.
+
+  def update(self, enabled, CS, frame, actuators, visual_alert, pcm_cancel, dragonconf):
 
     can_sends = []
     steer_alert = visual_alert == car.CarControl.HUDControl.VisualAlert.steerRequired

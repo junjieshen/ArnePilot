@@ -42,7 +42,7 @@ static void ui_init_vision(UIState *s) {
 
 void ui_init(UIState *s) {
   s->sm = new SubMaster({"modelV2", "controlsState", "uiLayoutState", "liveCalibration", "radarState", "deviceState", "roadCameraState", "liveLocationKalman",
-                         "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss", "dragonConf"});
+                         "pandaState", "carParams", "driverState", "driverMonitoringState", "sensorEvents", "carState", "ubloxGnss", "dragonConf", "liveMapData", "carState"});
 
   s->started = false;
   s->status = STATUS_OFFROAD;
@@ -112,6 +112,7 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
     update_line_data(s, road_edges[i], 0.025, 0, &scene.road_edge_vertices[i], max_distance);
   }
 
+
   // update path
   const float lead_d = scene.lead_data[0].getStatus() ? scene.lead_data[0].getDRel() * 2. : MAX_DRAW_DISTANCE;
   float path_length = (lead_d > 0.) ? lead_d - fmin(lead_d * 0.35, 10.) : MAX_DRAW_DISTANCE;
@@ -122,6 +123,38 @@ static void update_model(UIState *s, const cereal::ModelDataV2::Reader &model) {
 static void update_sockets(UIState *s) {
   SubMaster &sm = *(s->sm);
   if (sm.update(0) == 0) return;
+
+  if (s->started && sm.updated("controlsState")) {
+    auto event = sm["controlsState"];
+    auto data = event.getControlsState();
+    scene.controls_state = event.getControlsState();
+
+    // TODO: the alert stuff shouldn't be handled here
+    s->scene.steerOverride= scene.controls_state.getSteerOverride();
+    s->scene.output_scale = scene.controls_state.getLateralControlState().getPidState().getOutput();
+    s->scene.output_scale = scene.controls_state.getLateralControlState().getLqrState().getOutput();
+    s->scene.output_scale = scene.controls_state.getLateralControlState().getIndiState().getOutput();
+
+    auto alert_sound = scene.controls_state.getAlertSound();
+    if (scene.alert_type.compare(scene.controls_state.getAlertType()) != 0) {
+      if (alert_sound == AudibleAlert::NONE) {
+        s->sound->stop();
+      } else {
+        s->sound->play(alert_sound);
+      }
+    }
+    scene.alert_text1 = scene.controls_state.getAlertText1();
+    scene.alert_text2 = scene.controls_state.getAlertText2();
+    scene.alert_size = scene.controls_state.getAlertSize();
+    scene.alert_type = scene.controls_state.getAlertType();
+    auto alertStatus = scene.controls_state.getAlertStatus();
+    if (alertStatus == cereal::ControlsState::AlertStatus::USER_PROMPT) {
+      s->status = STATUS_WARNING;
+    } else if (alertStatus == cereal::ControlsState::AlertStatus::CRITICAL) {
+      s->status = STATUS_ALERT;
+    } else{
+      s->status = scene.controls_state.getEnabled() ? STATUS_ENGAGED : STATUS_DISENGAGED;
+    }
 
   UIScene &scene = s->scene;
   if (s->started && sm.updated("controlsState")) {
@@ -189,6 +222,13 @@ static void update_sockets(UIState *s) {
   } else if ((s->sm->frame - s->sm->rcv_frame("pandaState")) > 5*UI_FREQ) {
     scene.pandaType = cereal::PandaState::PandaType::UNKNOWN;
   }
+  if (sm.updated("liveMapData")) {
+    scene.map_valid = sm["liveMapData"].getLiveMapData().getMapValid();
+    scene.speedlimit = sm["liveMapData"].getLiveMapData().getSpeedLimit();
+    scene.speedlimit_valid = sm["liveMapData"].getLiveMapData().getSpeedLimitValid();
+    scene.speedlimitahead_valid = sm["liveMapData"].getLiveMapData().getSpeedLimitAheadValid();
+    scene.speedlimitaheaddistance = sm["liveMapData"].getLiveMapData().getSpeedLimitAheadDistance();
+  }
   if (sm.updated("ubloxGnss")) {
     auto data = sm["ubloxGnss"].getUbloxGnss();
     if (data.which() == cereal::UbloxGnss::MEASUREMENT_REPORT) {
@@ -251,7 +291,20 @@ static void update_sockets(UIState *s) {
     scene.dpIsUpdating = data.getDpIsUpdating();
     scene.dpAthenad = data.getDpAthenad();
   }
-  s->started = scene.deviceState.getStarted() || scene.frontview;
+  if (sm.updated("carState")) {
+    auto data = sm["carState"].getCarState();
+    if(scene.leftBlinker!=data.getLeftBlinker() || scene.rightBlinker!=data.getRightBlinker()) {
+      scene.blinker_blinkingrate = 100;
+    }
+    scene.leftBlinker = data.getLeftBlinker();
+    scene.rightBlinker = data.getRightBlinker();
+    scene.brakeLights = data.getBrakeLights();
+    scene.isReversing = data.getGearShifter() == cereal::CarState::GearShifter::REVERSE;
+    scene.leftBlindspot = data.getLeftBlindspot();
+    scene.rightBlindspot = data.getRightBlindspot();
+    scene.engineRPM = data.getEngineRPM();
+  }
+  s->started = scene.thermal.getStarted() || scene.frontview;
 }
 
 static void update_alert(UIState *s) {
@@ -352,6 +405,16 @@ static void update_status(UIState *s) {
       s->sidebar_collapsed = true;
       s->scene.alert_size = cereal::ControlsState::AlertSize::NONE;
       s->vipc_client = s->scene.frontview ? s->vipc_client_front : s->vipc_client_rear;
+  } else if ((s->sm)->frame % (7*UI_FREQ) == 0) {
+    read_param(&s->speed_lim_off, "SpeedLimitOffset");
+  } else if ((s->sm)->frame % (11*UI_FREQ) == 0) {
+    read_param(&s->limit_set_speed, "LimitSetSpeed");
+  } else if ((s->sm)->frame % (6*UI_FREQ) == 0) {
+    int param_read = read_param(&s->last_athena_ping, "LastAthenaPingTime");
+    if (param_read != 0) { // Failed to read param
+      s->scene.athenaStatus = NET_DISCONNECTED;
+    } else if (nanos_since_boot() - s->last_athena_ping < 70e9) {
+      s->scene.athenaStatus = NET_CONNECTED;
     } else {
       s->status = STATUS_OFFROAD;
       s->active_app = cereal::UiLayoutState::App::HOME;

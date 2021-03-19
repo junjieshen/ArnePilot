@@ -23,11 +23,11 @@ def plannerd_thread(sm=None, pm=None):
   VM = VehicleModel(CP)
 
   if sm is None:
-    sm = messaging.SubMaster(['carState', 'controlsState', 'radarState', 'modelV2', 'liveParameters', 'dragonConf'],
+    sm = messaging.SubMaster(['carState', 'controlsState', 'radarState', 'modelV2', 'liveParameters', 'dragonConf', 'liveMapData', 'latControl'],
                              poll=['radarState', 'modelV2'])
 
   if pm is None:
-    pm = messaging.PubMaster(['longitudinalPlan', 'liveLongitudinalMpc', 'lateralPlan', 'liveMpc'])
+    pm = messaging.PubMaster(['longitudinalPlan', 'liveLongitudinalMpc', 'lateralPlan', 'liveMpc', 'latControl'])
 
   sm['liveParameters'].valid = True
   sm['liveParameters'].sensorValid = True

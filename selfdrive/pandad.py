@@ -10,6 +10,13 @@ from selfdrive.hardware import TICI
 from selfdrive.hardware.tici.pins import GPIO_HUB_RST_N, GPIO_STM_BOOT0, GPIO_STM_RST_N
 from selfdrive.swaglog import cloudlog
 
+def get_expected_version():
+  with open(os.path.join(BASEDIR, "VERSION")) as f:
+    repo_version = f.read()
+  repo_version += "-EON" if os.path.isfile('/EON') else "-DEV"
+  return repo_version
+
+
 def set_panda_power(power=True):
   if not TICI:
     return
@@ -49,6 +56,7 @@ def get_expected_signature(fw_fn=None):
 
 
 def update_panda():
+  repo_version = get_expected_version()
   panda = None
   panda_dfu = None
 
@@ -88,25 +96,25 @@ def update_panda():
     fw_signature.hex(),
   ))
 
-  if panda.bootstub or panda_signature != fw_signature:
+  if panda.bootstub or not panda_version.startswith(repo_version):
     cloudlog.info("Panda firmware out of date, update required")
     panda.flash(fw_fn)
     cloudlog.info("Done flashing")
 
-  if panda.bootstub:
-    bootstub_version = panda.get_version()
-    cloudlog.info(f"Flashed firmware not booting, flashing development bootloader. Bootstub version: {bootstub_version}")
-    panda.recover()
-    cloudlog.info("Done flashing bootloader")
+  #if panda.bootstub:
+    #bootstub_version = panda.get_version()
+    #cloudlog.info(f"Flashed firmware not booting, flashing development bootloader. Bootstub version: {bootstub_version}")
+    #panda.recover()
+    #cloudlog.info("Done flashing bootloader")
 
   if panda.bootstub:
     cloudlog.info("Panda still not booting, exiting")
     raise AssertionError
 
-  panda_signature = panda.get_signature()
-  if panda_signature != fw_signature:
-    cloudlog.info("Version mismatch after flashing, exiting")
-    raise AssertionError
+  #panda_signature = panda.get_signature()
+  #if panda_signature != fw_signature:
+    #cloudlog.info("Version mismatch after flashing, exiting")
+    #raise AssertionError
 
   cloudlog.info("Resetting panda")
   panda.reset()

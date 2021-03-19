@@ -122,14 +122,26 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     modelLagWarningDEPRECATED @93;
 
     #dp
-    manualSteeringRequired @96;
-    manualSteeringRequiredBlinkersOn @97;
-    leadCarMoving @98;
+    preLaneChangeLeftALC @94;
+    preLaneChangeRightALC @96;
+    manualSteeringRequired @97;
+    manualSteeringRequiredBlinkersOn @98;
+    leadCarMoving @99;
 
     # timebomb assist
-    timebombWarn @99;
-    timebombBypassing @100;
-    timebombBypassed @101;
+    timebombWarn @100;
+    timebombBypassing @101;
+    timebombBypassed @102;
+
+    #arnepilot
+    longControlDisabled @103;
+    waitingMode @104;
+    reverseGearArne @105;
+    latControlDisabled @106;
+    preKeepHandsOnWheel @107;
+    promptKeepHandsOnWheel @108;
+    keepHandsOnWheel @109;
+    wrongGearArne @110;
   }
 }
 
@@ -195,6 +207,16 @@ struct CarState {
   # blindspot sensors
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
+
+  # dp
+  lkMode @37 :Bool;
+  stopSteering @38 :Bool; # timebomb - stopSteering
+  engineRPM @39 :Float32;
+  rightBlindspotD1 @40 :Float32;
+  rightBlindspotD2 @41 :Float32;
+  leftBlindspotD1 @42 :Float32;
+  leftBlindspotD2 @43 :Float32;
+  blindspotside @44 :Float32;
 
   struct WheelSpeeds {
     # optional wheel speeds
@@ -437,6 +459,11 @@ struct CarParams {
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
     kf @4 :Float32;
+    kfV @5 :List(Float32);
+    kfBP @6 :List(Float32);
+    newKfTuned @7 :Bool;
+    kdBP @8 :List(Float32);
+    kdV @9 :List(Float32);
   }
 
   struct LongitudinalPIDTuning {

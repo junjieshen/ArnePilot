@@ -7,8 +7,10 @@ from selfdrive.car.honda.values import HONDA_BOSCH
 # 2 = ACC-CAN - camera side
 # 3 = F-CAN A - OBDII port
 
-def get_pt_bus(car_fingerprint):
-  return 1 if car_fingerprint in HONDA_BOSCH else 0
+# CAN bus layout with giraffe
+# 0 = F-CAN B - powertrain
+# 1 = ACC-CAN - camera side
+# 2 = ACC-CAN - radar side
 
 def get_pt_bus(car_fingerprint, has_relay):
   return 1 if car_fingerprint in HONDA_BOSCH and has_relay else 0

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# pylint: disable=E1101
 # Safe Update: A simple service that waits for network access and tries to
 # update every 10 minutes. It's intended to make the OP update process more
 # robust against Git repository corruption. This service DOES NOT try to fix
@@ -40,6 +40,9 @@ from selfdrive.hardware import EON, TICI, HARDWARE
 from selfdrive.swaglog import cloudlog
 from selfdrive.controls.lib.alertmanager import set_offroad_alert
 from selfdrive.hardware.tici.agnos import flash_agnos_update
+from common.realtime import sec_since_boot
+from common.op_params import opParams
+from common.colors import COLORS
 
 LOCK_FILE = os.getenv("UPDATER_LOCK_FILE", "/tmp/safe_staging_overlay.lock")
 STAGING_ROOT = os.getenv("UPDATER_STAGING_ROOT", "/data/safe_staging")
@@ -50,6 +53,8 @@ OVERLAY_UPPER = os.path.join(STAGING_ROOT, "upper")
 OVERLAY_METADATA = os.path.join(STAGING_ROOT, "metadata")
 OVERLAY_MERGED = os.path.join(STAGING_ROOT, "merged")
 FINALIZED = os.path.join(STAGING_ROOT, "finalized")
+
+REBOOT_ON_UPDATE = opParams().get('update_behavior').lower().strip() == 'auto'  # if not auto, has to be alert
 
 
 class WaitTimeHelper:
@@ -329,7 +334,20 @@ def fetch_update(wait_helper: WaitTimeHelper) -> bool:
   return new_version
 
 
+class AutoReboot:
+  def __init__(self):
+    self.min_reboot_time = 5.
+    self.need_reboot = False
+    self.time_offroad = 0.0
+
+  @property
+  def should_reboot(self):
+    return (sec_since_boot() - self.time_offroad > self.min_reboot_time
+            and self.need_reboot and REBOOT_ON_UPDATE)
+
+
 def main():
+  auto_reboot = AutoReboot()
   params = Params()
 
   if params.get("DisableUpdates") == b"1":
@@ -376,6 +394,7 @@ def main():
     time_wrong = datetime.datetime.utcnow().year < 2019
     is_onroad = params.get("IsOffroad") != b"1"
     if is_onroad or time_wrong:
+      auto_reboot.time_offroad = sec_since_boot()
       wait_helper.sleep(30)
       cloudlog.info("not running updater, not offroad")
       continue
@@ -394,6 +413,14 @@ def main():
       # Fetch updates at most every 10 minutes
       if internet_ok and (update_now or time.monotonic() - last_fetch_time > 60*10):
         new_version = fetch_update(wait_helper)
+
+        auto_reboot.need_reboot |= new_version
+        if auto_reboot.should_reboot:
+          cloudlog.info(COLORS.RED + "AUTO UPDATE: REBOOTING" + COLORS.ENDC)
+          run(["am", "start", "-a", "android.intent.action.REBOOT"])
+        elif auto_reboot.need_reboot:
+          cloudlog.info(COLORS.BLUE_GREEN + "UPDATE FOUND, waiting {} sec. until reboot".format(auto_reboot.min_reboot_time - (sec_since_boot() - auto_reboot.time_offroad)) + COLORS.ENDC)
+
         update_failed_count = 0
         last_fetch_time = time.monotonic()
 

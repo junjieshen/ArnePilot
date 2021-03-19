@@ -486,6 +486,11 @@ void pigeon_thread() {
   panda->set_safety_model(cereal::CarParams::SafetyModel::TOYOTA);
   #endif
 
+  // dp
+  #ifdef DisableRelay
+  panda->set_safety_model(cereal::CarParams::SafetyModel::TOYOTA);
+  #endif
+
   while (!do_exit && panda->connected) {
     bool need_reset = false;
     std::string recv = pigeon->receive();
@@ -519,7 +524,9 @@ void pigeon_thread() {
 int main() {
   int err;
   LOGW("starting boardd");
-
+  #ifdef DisableRelay
+  LOGW("boardd is in DisableRelay mode.");
+  #endif
   // set process priority and affinity
   err = set_realtime_priority(54);
   LOG("set priority returns %d", err);
