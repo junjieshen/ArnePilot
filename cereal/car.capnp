@@ -122,26 +122,24 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     modelLagWarningDEPRECATED @93;
 
     #dp
-    preLaneChangeLeftALC @94;
-    preLaneChangeRightALC @96;
-    manualSteeringRequired @97;
-    manualSteeringRequiredBlinkersOn @98;
-    leadCarMoving @99;
+    manualSteeringRequired @96;
+    manualSteeringRequiredBlinkersOn @97;
+    leadCarMoving @98;
 
     # timebomb assist
-    timebombWarn @100;
-    timebombBypassing @101;
-    timebombBypassed @102;
+    timebombWarn @99;
+    timebombBypassing @100;
+    timebombBypassed @101;
 
     #arnepilot
-    longControlDisabled @103;
-    waitingMode @104;
-    reverseGearArne @105;
-    latControlDisabled @106;
-    preKeepHandsOnWheel @107;
-    promptKeepHandsOnWheel @108;
-    keepHandsOnWheel @109;
-    wrongGearArne @110;
+    longControlDisabled @102;
+    waitingMode @103;
+    reverseGearArne @104;
+    latControlDisabled @105;
+    preKeepHandsOnWheel @106;
+    promptKeepHandsOnWheel @107;
+    keepHandsOnWheel @108;
+    wrongGearArne @109;
   }
 }
 
