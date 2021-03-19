@@ -212,8 +212,6 @@ selfdrive/common/modeldata.h
 selfdrive/common/mat.h
 selfdrive/common/timing.h
 
-selfdrive/common/visionbuf.h
-selfdrive/common/visionbuf_ion.c
 selfdrive/common/visionimg.cc
 selfdrive/common/visionimg.h
 
