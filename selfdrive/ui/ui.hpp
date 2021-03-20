@@ -80,18 +80,6 @@ const int rec_btn_w = 180;
 const int rec_btn_x = 870;
 const int rec_btn_y = 800;
 
-// dp - dynamic follow btn
-const int df_btn_h = 180;
-const int df_btn_w = 180;
-const int df_btn_x = 1650;
-const int df_btn_y = 750;
-// dp - accel profile btn
-const int ap_btn_h = 180;
-const int ap_btn_w = 180;
-const int ap_btn_x = 1450;
-const int ap_btn_y = 750;
-const int info_bar_h = 80;
-
 typedef enum NetStatus {
   NET_CONNECTED,
   NET_DISCONNECTED,
