@@ -243,9 +243,9 @@ class Planner():
     else:
       speed_ahead_distance = default_brake_distance
 
-    v_speedlimit = NO_CURVATURE_SPEED
-    v_curvature_map = NO_CURVATURE_SPEED
-    v_speedlimit_ahead = NO_CURVATURE_SPEED
+    self.v_speedlimit = NO_CURVATURE_SPEED
+    self.v_curvature_map = NO_CURVATURE_SPEED
+    self.v_speedlimit_ahead = NO_CURVATURE_SPEED
     now = datetime.now()
     try:
       if sm['liveMapData'].speedLimitValid and osm and self.osm and (sm['liveMapData'].lastGps.timestamp -time.mktime(now.timetuple()) * 1000) < 10000 and (smart_speed or smart_speed_max_vego > v_ego):
@@ -443,8 +443,8 @@ class Planner():
     longitudinalPlan.hasLead = self.mpc1.prev_lead_status
     longitudinalPlan.longitudinalPlanSource = self.longitudinalPlanSource
 
-    longitudinalPlan.vCurvature = float(v_curvature_map)
-    longitudinalPlan.decelForTurn = bool(decel_for_turn)
+    longitudinalPlan.vCurvature = float(self.v_curvature_map)
+    longitudinalPlan.decelForTurn = bool(self.decel_for_turn)
     longitudinalPlan.mapValid = True
 
     longitudinalPlan.fcw = self.fcw
