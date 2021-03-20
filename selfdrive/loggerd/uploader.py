@@ -240,7 +240,7 @@ def uploader_fn(exit_event):
     check_network = (counter % 12 == 0 if offroad else True)
     if check_network:
       on_hotspot = is_on_hotspot()
-      on_wifi = is_on_wifi(
+      on_wifi = is_on_wifi()
 
       # dp - load temp monitor conf
       last_modified_check, modified = get_last_modified(LAST_MODIFIED_UPLOADER, last_modified_check, modified)
