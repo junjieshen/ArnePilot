@@ -10,9 +10,6 @@ from selfdrive.monitoring.hands_on_wheel_monitor import HandsOnWheelStatus
 from common.realtime import DT_DMON, sec_since_boot
 import time
 
-from common.realtime import DT_DMON, sec_since_boot
-import time
-
 def dmonitoringd_thread(sm=None, pm=None):
   if pm is None:
     pm = messaging.PubMaster(['driverMonitoringState'])
@@ -35,11 +32,6 @@ def dmonitoringd_thread(sm=None, pm=None):
   driver_engaged = False
   steering_wheel_engaged = False
   hands_on_wheel_monitoring_enabled = Params().get("HandsOnWheelMonitoring") == b"1"
-
-  # dp
-  sm['dragonConf'].dpDriverMonitor = True
-  sm['dragonConf'].dpSteeringMonitor = True
-  sm['dragonConf'].dpSteeringMonitorTimer = 70
 
   # 10Hz <- dmonitoringmodeld
   while True:
