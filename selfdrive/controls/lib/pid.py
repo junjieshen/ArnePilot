@@ -1,4 +1,5 @@
 import numpy as np
+from common.op_params import opParams
 from common.numpy_fast import clip, interp
 
 def apply_deadzone(error, deadzone):
@@ -25,20 +26,24 @@ class PIController:
     self.i_rate = 1.0 / rate
     self.sat_limit = sat_limit
     self.convert = convert
+    self.op_params = opParams()
 
     self.reset()
 
   @property
   def k_p(self):
-    return interp(self.speed, self._k_p[0], self._k_p[1])
+    return self.op_params.get('lat_p')
+    # return interp(self.speed, self._k_p[0], self._k_p[1])
 
   @property
   def k_i(self):
-    return interp(self.speed, self._k_i[0], self._k_i[1])
+    return self.op_params.get('lat_i')
+    # return interp(self.speed, self._k_i[0], self._k_i[1])
 
   @property
   def k_d(self):
-    return interp(self.speed, self._k_d[0], self._k_d[1])
+    return self.op_params.get('lat_d')
+    # return interp(self.speed, self._k_d[0], self._k_d[1])
 
 
   def _check_saturation(self, control, check_saturation, error):
