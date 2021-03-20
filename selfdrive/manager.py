@@ -19,7 +19,7 @@ import re
 from common.dp_conf import init_params_vals
 
 from common.basedir import BASEDIR
-from common.hardware import HARDWARE, ANDROID, PC
+from selfdrive.hardware import HARDWARE, EON, PC, TICI
 WEBCAM = os.getenv("WEBCAM") is not None
 sys.path.append(os.path.join(BASEDIR, "pyextra"))
 os.environ['BASEDIR'] = BASEDIR
@@ -177,7 +177,7 @@ from selfdrive.registration import register
 from selfdrive.version import version, dirty
 from selfdrive.loggerd.config import ROOT
 from selfdrive.launcher import launcher
-from common.apk import update_apks, pm_apply_packages, start_offroad
+from selfdrive.hardware.eon.apk import update_apks, pm_apply_packages, start_offroad
 
 ThermalStatus = cereal.log.ThermalData.ThermalStatus
 
