@@ -166,8 +166,6 @@ class Controls:
       self.events.add(EventName.communityFeatureDisallowed, static=True)
     if not car_recognized:
       self.events.add(EventName.carUnrecognized, static=True)
-    if hw_type == HwType.whitePanda:
-      self.events.add(EventName.whitePandaUnsupported, static=True)
 
     # controlsd is driven by can recv, expected at 100Hz
     self.rk = Ratekeeper(100, print_delay_threshold=None)
@@ -226,7 +224,7 @@ class Controls:
         self.events.add(EventName.laneChangeBlocked)
       else:
         if direction == LaneChangeDirection.left:
-          self.events.add(EventName.preLaneChangeLeftALC if self.sm['pathPlan'].dpALCAllowed else EventName.preLaneChangeLeft)
+          self.events.add(EventName.preLaneChangeLeft)
         else:
           self.events.add(EventName.preLaneChangeRight)
     elif self.sm['lateralPlan'].laneChangeState in [LaneChangeState.laneChangeStarting,
@@ -288,41 +286,6 @@ class Controls:
     if not self.sm['dragonConf'].dpAtl and CS.brakePressed and self.sm['longitudinalPlan'].vTargetFuture >= STARTING_TARGET_SPEED \
       and self.CP.openpilotLongitudinalControl and CS.vEgo < 0.3:
       self.events.add(EventName.noTarget)
-
-    if self.dp_lead_away_alert:
-      current_speed = CS.vEgo * 3.6
-
-      if CS.brakePressed or current_speed < self.dp_lead_away_min_speed or self.dp_lead_away_state == LEAD_AWAY_STATE_ALERTED:
-        self.dp_lead_away_alert_lead_count = 0
-        self.dp_lead_away_alert_nolead_count = 0
-        self.dp_lead_away_state = LEAD_AWAY_STATE_OFF
-
-      if current_speed >= self.dp_lead_away_min_speed:
-        nolead_count = interp(current_speed, [self.dp_lead_away_min_speed, 100], [300, 100])
-        # when car had lead for 5 more secs and lead move away for 3 secs
-        if self.dp_lead_away_state == LEAD_AWAY_STATE_OFF and self.sm['plan'].hasLead:
-          self.dp_lead_away_alert_lead_count += 1
-        elif self.dp_lead_away_state == LEAD_AWAY_STATE_ON and not self.sm['plan'].hasLead:
-          self.dp_lead_away_alert_nolead_count += 1
-
-        if self.dp_lead_away_state == LEAD_AWAY_STATE_OFF and self.dp_lead_away_alert_lead_count >= 300:
-          self.dp_lead_away_state = LEAD_AWAY_STATE_ON
-        elif self.dp_lead_away_state == LEAD_AWAY_STATE_ON and self.dp_lead_away_alert_nolead_count >= nolead_count:
-          self.events.add(EventName.leadCarMoving)
-          self.dp_lead_away_state = LEAD_AWAY_STATE_ALERTED
-
-    # dp lead car moving alert
-    if self.sm['dragonConf'].dpLeadCarAlert:
-      if not self.CP.radarOffCan and self.sm['plan'].hasLead and CS.vEgo <= 0.01 and 0.3 >= abs(self.sm['plan'].vTarget) >= 0:
-        self.dp_lead_count += 1
-      else:
-        self.dp_lead_count = 0
-
-      if self.dp_lead_count >= 300 and abs(self.sm['plan'].vTargetFuture) >= 0.1:
-        self.events.add(EventName.leadCarMoving)
-
-      if CS.vEgo > 0. or CS.gearShifter in [car.CarState.GearShifter.reverse, car.CarState.GearShifter.park]:
-        self.dp_lead_count = 0
 
   def data_sample(self):
     """Receive data from sockets and update carState"""
