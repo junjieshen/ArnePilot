@@ -168,7 +168,7 @@ def thermald_thread():
   pm = messaging.PubMaster(['deviceState', 'thermal'])
   pandaState_timeout = int(1000 * 2.5 * DT_TRML)  # 2.5x the expected pandaState frequency
   pandaState_sock = messaging.sub_sock('pandaState', timeout=pandaState_timeout)
-  location_sock = messaging.sub_sock('gpsLocationExternal')
+  #location_sock = messaging.sub_sock('gpsLocationExternal')
 
   fan_speed = 0
   count = 0
@@ -384,7 +384,7 @@ def thermald_thread():
     # controls will warn with CPU above 95 or battery above 60
     startup_conditions["device_temp_good"] = thermal_status < ThermalStatus.danger
     set_offroad_alert_if_changed("Offroad_TemperatureTooHigh", (not startup_conditions["device_temp_good"]))
-    
+
     startup_conditions["hardware_supported"] = pandaState is not None
     set_offroad_alert_if_changed("Offroad_HardwareUnsupported", pandaState is not None and not startup_conditions["hardware_supported"])
 
@@ -442,7 +442,7 @@ def thermald_thread():
     if dp_allow_shutdown and off_ts is not None and dp_auto_shutdown and sec_since_boot() - off_ts >= dp_auto_shutdown_in * 60:
       msg.thermal.chargingDisabled = True
       shutdown = False
-      if health is not None:
+      if pandaState is not None:
         if pandaState.pandaState.usbPowerMode in [log.PandaState.UsbPowerMode.client, log.PandaState.UsbPowerMode.none]:
           shutdown = True
       else:
