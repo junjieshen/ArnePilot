@@ -37,8 +37,6 @@
 #define COLOR_YELLOW nvgRGBA(218, 202, 37, 255)
 #define COLOR_RED nvgRGBA(201, 34, 49, 255)
 #define COLOR_RED_ALPHA(x) nvgRGBA(201, 34, 49, x)
-#define COLOR_OCHRE nvgRGBA(218, 111, 37, 255)
-#define COLOR_OCHRE_ALPHA(x) nvgRGBA(218, 111, 37, x)
 
 #define UI_BUF_COUNT 4
 
@@ -54,8 +52,7 @@ typedef struct Rect {
 } Rect;
 
 const int sbr_w = 300;
-const int bdr_s = 10;
-const int bdr_is = 30;
+const int bdr_s = 30;
 const int header_h = 420;
 const int footer_h = 280;
 const Rect settings_btn = {50, 35, 200, 117};
@@ -95,16 +92,15 @@ typedef enum UIStatus {
 } UIStatus;
 
 static std::map<UIStatus, NVGcolor> bg_colors = {
-
 #ifdef QCOM
-  {STATUS_OFFROAD, nvgRGBA(0x0, 0x0, 0x0, 0xff)},
+  {STATUS_OFFROAD, nvgRGBA(0x07, 0x23, 0x39, 0xf1)},
 #else
   {STATUS_OFFROAD, nvgRGBA(0x0, 0x0, 0x0, 0xff)},
 #endif
-  {STATUS_DISENGAGED, nvgRGBA(0x0, 0x0, 0x0, 0xff)},
-  {STATUS_ENGAGED, nvgRGBA(0x01, 0x50, 0x01, 0x01)},
-  {STATUS_WARNING, nvgRGBA(0x80, 0x80, 0x80, 0x0f)},
-  {STATUS_ALERT, nvgRGBA(0xC9, 0x22, 0x31, 0xff)},
+  {STATUS_DISENGAGED, nvgRGBA(0x17, 0x33, 0x49, 0xc8)},
+  {STATUS_ENGAGED, nvgRGBA(0x17, 0x86, 0x44, 0xf1)},
+  {STATUS_WARNING, nvgRGBA(0xDA, 0x6F, 0x25, 0xf1)},
+  {STATUS_ALERT, nvgRGBA(0xC9, 0x22, 0x31, 0xf1)},
 };
 
 typedef struct {
@@ -120,12 +116,6 @@ typedef struct UIScene {
 
   mat3 view_from_calib;
   bool world_objects_visible;
-
-  float speedlimit;
-  bool speedlimit_valid;
-  float speedlimitaheaddistance;
-  bool speedlimitahead_valid;
-  bool map_valid;
 
   bool is_rhd;
   bool frontview;
@@ -242,10 +232,6 @@ typedef struct UIState {
   bool ignition;
   bool is_metric;
   bool longitudinal_control;
-  bool limit_set_speed;
-  bool is_ego_over_limit;
-  float speed_lim_off;
-  uint64_t last_athena_ping;
   uint64_t started_frame;
 
   bool sidebar_collapsed;
