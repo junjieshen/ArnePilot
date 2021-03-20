@@ -13,11 +13,19 @@ speed_signs_in_mph = opParams().get('speed_signs_in_mph')
 
 VisualAlert = car.CarControl.HUDControl.VisualAlert
 
-# Accel limits
-ACCEL_HYST_GAP = 0.02  # don't change accel command for small oscilalitons within this value
-ACCEL_MAX = 3.5  # 3.5 m/s2
-ACCEL_MIN = -3.5 # 3.5 m/s2
-ACCEL_SCALE = max(ACCEL_MAX, -ACCEL_MIN)
+def accel_hysteresis(accel, accel_steady, enabled):
+
+  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
+  if not enabled:
+    # send 0 when disabled, otherwise acc faults
+    accel_steady = 0.
+  elif accel > accel_steady + CarControllerParams.ACCEL_HYST_GAP:
+    accel_steady = accel - CarControllerParams.ACCEL_HYST_GAP
+  elif accel < accel_steady - CarControllerParams.ACCEL_HYST_GAP:
+    accel_steady = accel + CarControllerParams.ACCEL_HYST_GAP
+  accel = accel_steady
+
+  return accel, accel_steady
 
 # Blindspot codes
 LEFT_BLINDSPOT = b'\x41'
@@ -110,6 +118,9 @@ def accel_hysteresis(accel, accel_steady, enabled):
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
+      # dp
+    self.last_blinker_on = False
+    self.blinker_end_frame = 0.
     self.last_steer = 0
     self.accel_steady = 0.
     self.alert_active = False
@@ -133,12 +144,8 @@ class CarController():
 
     self.packer = CANPacker(dbc_name)
 
-    # dp
-    self.last_blinker_on = False
-    self.blinker_end_frame = 0.
-
   def update(self, enabled, CS, frame, actuators, pcm_cancel_cmd, hud_alert,
-             left_line, right_line, lead, left_lane_depart, right_lane_depart, dragonconf, lkas):
+             left_line, right_line, lead, left_lane_depart, right_lane_depart, dragonconf):
 
     # *** compute control surfaces ***
 
@@ -162,7 +169,7 @@ class CarController():
         #dynamic_accel_max = ACCEL_MAX - (((CS.out.vEgo - 5.5)/ 14.5))
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady, enabled)
-    apply_accel = clip(apply_accel * ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX)
+    apply_accel = clip(apply_accel * CarControllerParams.ACCEL_SCALE, CarControllerParams.ACCEL_MIN, CarControllerParams.ACCEL_MAX)
 
     if CS.CP.enableGasInterceptor:
       if CS.out.gasPressed:
@@ -177,9 +184,8 @@ class CarController():
         apply_accel = min(apply_accel, 0.0)
 
     # steer torque
-    new_steer = int(round(actuators.steer * SteerLimitParams.STEER_MAX))
-    apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, SteerLimitParams)
-    self.steer_rate_limited = new_steer != apply_steer
+    new_steer = int(round(actuators.steer * CarControllerParams.STEER_MAX))
+    apply_steer = apply_toyota_steer_torque_limits(new_steer, self.last_steer, CS.out.steeringTorqueEps, CarControllerParams)
 
     # only cut torque when steer state is a known fault
     if CS.steer_state in [9, 25]:
@@ -279,7 +285,7 @@ class CarController():
 
 
     if (frame % 100 == 0 or send_ui) and Ecu.fwdCamera in self.fake_ecus:
-      can_sends.append(create_ui_command(self.packer, steer_alert, pcm_cancel_cmd, left_line, right_line, dragon_left_lane_depart, dragon_right_lane_depart, lkas))
+      can_sends.append(create_ui_command(self.packer, steer_alert, pcm_cancel_cmd, left_line, right_line, dragon_left_lane_depart, dragon_right_lane_depart))
 
     if frame % 100 == 0 and Ecu.dsu in self.fake_ecus:
       can_sends.append(create_fcw_command(self.packer, fcw_alert))
