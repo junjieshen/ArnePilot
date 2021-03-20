@@ -231,11 +231,16 @@ def uploader_fn(exit_event):
   last_modified_check = None
 
   backoff = 0.1
+  counter = 0
   while not exit_event.is_set():
     sm.update(0)
     on_wifi = force_wifi or sm['deviceState'].networkType == NetworkType.wifi
     offroad = params.get("IsOffroad") == b'1'
     allow_raw_upload = params.get("IsUploadRawEnabled") != b"0"
+    check_network = (counter % 12 == 0 if offroad else True)
+    if check_network:
+      on_hotspot = is_on_hotspot()
+      on_wifi = is_on_wifi(
 
       # dp - load temp monitor conf
       last_modified_check, modified = get_last_modified(LAST_MODIFIED_UPLOADER, last_modified_check, modified)
