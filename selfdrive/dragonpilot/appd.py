@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.7
 import time
 import subprocess
-import cereal
+import cereal import log
 import cereal.messaging as messaging
 ThermalStatus = log.DeviceState.ThermalStatus
 from selfdrive.swaglog import cloudlog
