@@ -14,6 +14,7 @@ from common.numpy_fast import clip, interp
 from common.params import Params
 from common.realtime import DT_TRML, sec_since_boot
 from selfdrive.controls.lib.alertmanager import set_offroad_alert
+from selfdrive.hardware import EON, HARDWARE
 from selfdrive.loggerd.config import get_available_percent
 from selfdrive.pandad import get_expected_signature
 from selfdrive.swaglog import cloudlog
@@ -162,7 +163,6 @@ def set_offroad_alert_if_changed(offroad_alert: str, show_alert: bool, extra_tex
 
 
 def thermald_thread():
-  health_timeout = int(1000 * 2.5 * DT_TRML)  # 2.5x the expected health frequency
 
   # now loop
   pm = messaging.PubMaster(['deviceState', 'thermal'])
@@ -227,6 +227,7 @@ def thermald_thread():
     # dp legacy
     thermal_msg = messaging.new_message('thermal')
     pandaState = messaging.recv_sock(pandaState_sock, wait=True)
+    msg = read_thermal(thermal_config)
 
     if pandaState is not None:
       usb_power = pandaState.pandaState.usbPowerMode != log.PandaState.UsbPowerMode.client
@@ -383,8 +384,7 @@ def thermald_thread():
     # controls will warn with CPU above 95 or battery above 60
     startup_conditions["device_temp_good"] = thermal_status < ThermalStatus.danger
     set_offroad_alert_if_changed("Offroad_TemperatureTooHigh", (not startup_conditions["device_temp_good"]))
-    should_start = all(startup_conditions.values())
-
+    
     startup_conditions["hardware_supported"] = pandaState is not None
     set_offroad_alert_if_changed("Offroad_HardwareUnsupported", pandaState is not None and not startup_conditions["hardware_supported"])
 
