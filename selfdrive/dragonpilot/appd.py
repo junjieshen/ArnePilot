@@ -3,7 +3,7 @@ import time
 import subprocess
 import cereal
 import cereal.messaging as messaging
-ThermalStatus = cereal.log.ThermalData.ThermalStatus
+ThermalStatus = log.DeviceState.ThermalStatus
 from selfdrive.swaglog import cloudlog
 from common.params import Params, put_nonblocking
 params = Params()
