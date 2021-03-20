@@ -4,7 +4,7 @@ from selfdrive.hardware import EON, TICI
 from cereal import log
 from common.dp_common import get_last_modified, param_get_if_updated
 from common.dp_time import LAST_MODIFIED_LANE_PLANNER
-from common.travis_checker import travis
+
 
 TRAJECTORY_SIZE = 33
 # camera offset is meters from center car to camera
@@ -36,13 +36,6 @@ class LanePlanner:
 
     self.l_lane_change_prob = 0.
     self.r_lane_change_prob = 0.
-
-    # dp
-    self.dp_camera_offset = CAMERA_OFFSET * 100
-    self.last_modified_dp_camera_offset = None
-    self.modified = None
-    self.last_modified = None
-    self.last_modified_check = None
 
     # dp
     self.dp_camera_offset = CAMERA_OFFSET * 100
@@ -97,7 +90,7 @@ class LanePlanner:
     self.lane_width_certainty += 0.05 * (l_prob * r_prob - self.lane_width_certainty)
     current_lane_width = abs(self.rll_y[0] - self.lll_y[0])
     self.lane_width_estimate += 0.005 * (current_lane_width - self.lane_width_estimate)
-    speed_lane_width = interp(v_ego, [0., 14., 20.], [2.5, 3., 3.5]) # German Standards
+    speed_lane_width = interp(v_ego, [0., 31.], [2.8, 3.5])
     self.lane_width = self.lane_width_certainty * self.lane_width_estimate + \
                       (1 - self.lane_width_certainty) * speed_lane_width
 
