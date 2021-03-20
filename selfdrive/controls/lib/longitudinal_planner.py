@@ -426,9 +426,6 @@ class Planner():
     self.mpc2.publish(pm)
 
     plan_send = messaging.new_message('longitudinalPlan')
-    plan_send.plan.vCurvature = float(v_curvature_map)
-    plan_send.plan.decelForTurn = bool(decel_for_turn)
-    plan_send.plan.mapValid = True
 
     plan_send.valid = sm.all_alive_and_valid(service_list=['carState', 'controlsState', 'radarState'])
 
@@ -445,6 +442,11 @@ class Planner():
     longitudinalPlan.vTargetFuture = float(self.v_acc_future)
     longitudinalPlan.hasLead = self.mpc1.prev_lead_status
     longitudinalPlan.longitudinalPlanSource = self.longitudinalPlanSource
+
+    plan_send.plan.vCurvature = float(v_curvature_map)
+    plan_send.plan.decelForTurn = bool(decel_for_turn)
+    plan_send.plan.mapValid = True
+
     longitudinalPlan.fcw = self.fcw
 
     longitudinalPlan.processingDelay = (plan_send.logMonoTime / 1e9) - sm.rcv_time['radarState']
