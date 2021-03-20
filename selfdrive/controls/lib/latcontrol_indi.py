@@ -44,22 +44,6 @@ class LatControlINDI():
     self.sat_count_rate = 1.0 * DT_CTRL
     self.reset()
 
-  @property
-  def RC(self):
-    return interp(self.speed, self._RC[0], self._RC[1])
-
-  @property
-  def G(self):
-    return interp(self.speed, self._G[0], self._G[1])
-
-  @property
-  def outer_loop_gain(self):
-    return interp(self.speed, self._outer_loop_gain[0], self._outer_loop_gain[1])
-
-  @property
-  def inner_loop_gain(self):
-    return interp(self.speed, self._inner_loop_gain[0], self._inner_loop_gain[1])
-
   def reset(self):
     self.delayed_output = 0.
     self.output_steer = 0.
