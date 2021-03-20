@@ -110,15 +110,15 @@ class CarState(CarStateBase):
 
     if self.accurate_steer_angle_seen:
       if self.dp_toyota_zss:
-        ret.steeringAngle = cp.vl["SECONDARY_STEER_ANGLE"]['ZORRO_STEER'] - self.angle_offset
+        ret.steeringAngleDeg = cp.vl["SECONDARY_STEER_ANGLE"]['ZORRO_STEER'] - self.angle_offset
       else:
-        ret.steeringAngle = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] - self.angle_offset
+        ret.steeringAngleDeg = cp.vl["STEER_TORQUE_SENSOR"]['STEER_ANGLE'] - self.angle_offset
 
       if self.needs_angle_offset:
         angle_wheel = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
-        if (abs(angle_wheel) > 1e-3 and abs(ret.steeringAngle) > 1e-3) or self.dp_toyota_zss:
+        if (abs(angle_wheel) > 1e-3 and abs(ret.steeringAngleDeg) > 1e-3) or self.dp_toyota_zss:
           self.needs_angle_offset = False
-          self.angle_offset = ret.steeringAngle - angle_wheel
+          self.angle_offset = ret.steeringAngleDeg - angle_wheel
     else:
       ret.steeringAngleDeg = cp.vl["STEER_ANGLE_SENSOR"]['STEER_ANGLE'] + cp.vl["STEER_ANGLE_SENSOR"]['STEER_FRACTION']
 
@@ -326,10 +326,10 @@ class CarState(CarStateBase):
     ret.cruiseState.speed = min(max(7, ret.cruiseState.speed - self.setspeedoffset),v_cruise_pcm_max) * CV.KPH_TO_MS
     #print("ret.cruiseState.speed after = " + str(ret.cruiseState.speed) + " m/s or " +  str(round(ret.cruiseState.speed * CV.MS_TO_KPH)) + " kph")
     if not ret.leftBlinker and not ret.rightBlinker:
-      self.Angles[self.Angle_counter] = abs(ret.steeringAngle)
+      self.Angles[self.Angle_counter] = abs(ret.steeringAngleDeg)
       self.Angles_later[self.Angle_counter] = abs(angle_later)
     else:
-      self.Angles[self.Angle_counter] = abs(ret.steeringAngle) * 0.8
+      self.Angles[self.Angle_counter] = abs(ret.steeringAngleDeg) * 0.8
       if ret.vEgo > 11.0:
         self.Angles_later[self.Angle_counter] = abs(angle_later) * 0.8
       else:
