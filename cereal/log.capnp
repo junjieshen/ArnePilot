@@ -1201,7 +1201,7 @@ struct DriverMonitoringState @0xb83cda094a1da284 {
   isRHDDEPRECATED @4 :Bool;
   isPreviewDEPRECATED @15 :Bool;
   rhdCheckedDEPRECATED @5 :Bool;
-  handsOnWheelState @16 :HandsOnWheelState;
+  handsOnWheelState @17 :HandsOnWheelState;
 
   enum HandsOnWheelState {
     none @0;          # hand on wheel monitoring inactive
