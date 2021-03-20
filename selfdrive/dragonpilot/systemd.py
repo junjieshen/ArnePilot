@@ -256,7 +256,7 @@ def update_ip(msg):
     try:
       result = subprocess.check_output(["ifconfig", "wlan0"], encoding='utf8')
       val = re.findall(r"inet addr:((\d+\.){3}\d+)", result)[0][0]
-    except:
+    except Exception:
       pass
   setattr(msg.dragonConf, get_struct_name('dp_ip_addr'), val)
   return msg

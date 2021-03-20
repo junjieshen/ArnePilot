@@ -2,13 +2,10 @@
 import json
 import os
 import random
-import re
-import subprocess
+import requests
 import threading
 import time
 import traceback
-
-import requests
 
 from cereal import log
 import cereal.messaging as messaging
@@ -17,9 +14,6 @@ from common.params import Params
 from selfdrive.loggerd.xattr_cache import getxattr, setxattr
 from selfdrive.loggerd.config import ROOT
 from selfdrive.swaglog import cloudlog
-from common.dp_time import LAST_MODIFIED_UPLOADER
-from common.dp_common import get_last_modified, param_get_if_updated
-from selfdrive.data_collection import gps_uploader
 
 NetworkType = log.DeviceState.NetworkType
 UPLOAD_ATTR_NAME = 'user.upload'
@@ -52,16 +46,6 @@ def clear_locks(root):
     except OSError:
       cloudlog.exception("clear_locks failed")
 
-
-def is_on_hotspot():
-  try:
-    result = subprocess.check_output(["ifconfig", "wlan0"], stderr=subprocess.STDOUT, encoding='utf8')
-    result = re.findall(r"inet addr:((\d+\.){3}\d+)", result)[0][0]
-    return (result.startswith('192.168.43.') or  # android
-            result.startswith('172.20.10.') or  # ios
-            result.startswith('10.0.2.'))  # toyota entune
-  except Exception:
-    return False
 
 class Uploader():
   def __init__(self, dongle_id, root):
@@ -220,43 +204,14 @@ def uploader_fn(exit_event):
   sm = messaging.SubMaster(['deviceState'])
   uploader = Uploader(dongle_id, ROOT)
 
-  # dp
-  dp_upload_on_mobile = False
-  dp_last_modified_upload_on_mobile = None
-  dp_upload_on_hotspot = False
-  dp_last_modified_upload_on_hotspot = None
-
-  modified = None
-  last_modified = None
-  last_modified_check = None
-
   backoff = 0.1
-  counter = 0
   while not exit_event.is_set():
     sm.update(0)
     on_wifi = force_wifi or sm['deviceState'].networkType == NetworkType.wifi
     offroad = params.get("IsOffroad") == b'1'
     allow_raw_upload = params.get("IsUploadRawEnabled") != b"0"
-    check_network = (counter % 12 == 0 if offroad else True)
-    if check_network:
-      on_hotspot = is_on_hotspot()
-      on_wifi = is_on_wifi()
 
-      # dp - load temp monitor conf
-      last_modified_check, modified = get_last_modified(LAST_MODIFIED_UPLOADER, last_modified_check, modified)
-      if last_modified != modified:
-        dp_upload_on_mobile, dp_last_modified_upload_on_mobile = param_get_if_updated("dp_upload_on_mobile", "bool", dp_upload_on_mobile, dp_last_modified_upload_on_mobile)
-        dp_upload_on_hotspot, dp_last_modified_upload_on_hotspot = param_get_if_updated("dp_upload_on_hotspot", "bool", dp_upload_on_hotspot, dp_last_modified_upload_on_hotspot)
-        last_modified = modified
-
-      should_upload = on_wifi and not on_hotspot
-
-    if not uploader_disabled:
-      d = uploader.next_file_to_upload(with_raw=allow_raw_upload and should_upload)
-    else:
-      d = None
-    gps_uploader.upload_data()
-    counter += 1
+    d = uploader.next_file_to_upload(with_raw=allow_raw_upload and on_wifi and offroad)
     if d is None:  # Nothing to upload
       if allow_sleep:
         time.sleep(60 if offroad else 5)
@@ -264,7 +219,7 @@ def uploader_fn(exit_event):
 
     key, fn = d
 
-    cloudlog.event("uploader_netcheck", is_on_hotspot=on_hotspot, is_on_wifi=on_wifi)
+    cloudlog.event("uploader_netcheck", is_on_wifi=on_wifi)
     cloudlog.info("to upload %r", d)
     success = uploader.upload(key, fn)
     if success:

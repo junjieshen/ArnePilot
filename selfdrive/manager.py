@@ -145,7 +145,7 @@ def build():
           try:
             result = subprocess.check_output(["ifconfig", "wlan0"], encoding='utf8')
             ip = re.findall(r"inet addr:((\d+\.){3}\d+)", result)[0][0]
-          except:
+          except FileExistsError:
             ip = 'N/A'
 
         # Show TextWindow
@@ -163,7 +163,7 @@ if __name__ == "__main__" and not PREBUILT:
 import cereal.messaging as messaging
 from cereal import log
 
-from common.params import Params, put_nonblocking
+from common.params import Params
 from selfdrive.registration import register
 from selfdrive.launcher import launcher
 
@@ -685,7 +685,7 @@ if __name__ == "__main__":
       try:
         result = subprocess.check_output(["ifconfig", "wlan0"], encoding='utf8')
         ip = re.findall(r"inet addr:((\d+\.){3}\d+)", result)[0][0]
-      except:
+      except Exception:
         ip = 'N/A'
 
     # Show last 3 lines of traceback

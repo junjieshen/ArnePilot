@@ -443,9 +443,9 @@ class Planner():
     longitudinalPlan.hasLead = self.mpc1.prev_lead_status
     longitudinalPlan.longitudinalPlanSource = self.longitudinalPlanSource
 
-    plan_send.plan.vCurvature = float(v_curvature_map)
-    plan_send.plan.decelForTurn = bool(decel_for_turn)
-    plan_send.plan.mapValid = True
+    longitudinalPlan.vCurvature = float(v_curvature_map)
+    longitudinalPlan.decelForTurn = bool(decel_for_turn)
+    longitudinalPlan.mapValid = True
 
     longitudinalPlan.fcw = self.fcw
 

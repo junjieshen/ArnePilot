@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os
 from cereal import car, log
-from common.numpy_fast import clip, interp
+from common.numpy_fast import clip
 from common.realtime import sec_since_boot, config_realtime_process, Priority, Ratekeeper, DT_CTRL
 from common.profiler import Profiler
 from common.params import Params, put_nonblocking
@@ -21,7 +21,7 @@ from selfdrive.controls.lib.alertmanager import AlertManager
 from selfdrive.controls.lib.vehicle_model import VehicleModel
 from selfdrive.controls.lib.longitudinal_planner import LON_MPC_STEP
 from selfdrive.locationd.calibrationd import Calibration
-from selfdrive.hardware import HARDWARE, TICI
+from selfdrive.hardware import HARDWARE
 from common.travis_checker import travis
 #import threading
 from selfdrive.interceptor import Interceptor
@@ -160,8 +160,8 @@ class Controls:
 
     self.startup_event = get_startup_event(car_recognized, controller_available)
 
-    # if not sounds_available:
-    #   self.events.add(EventName.soundsUnavailable, static=True)
+    if not sounds_available:
+      self.events.add(EventName.soundsUnavailable, static=True)
     if community_feature_disallowed:
       self.events.add(EventName.communityFeatureDisallowed, static=True)
     if not car_recognized:
@@ -429,7 +429,7 @@ class Controls:
 
     if not self.active:
       self.LaC.reset()
-      self.LoC.reset(v_pid=plan.vTargetFuture)
+      self.LoC.reset(v_pid=long_plan.vTargetFuture)
 
     long_plan_age = DT_CTRL * (self.sm.frame - self.sm.rcv_frame['longitudinalPlan'])
     # no greater than dt mpc + dt, to prevent too high extraps

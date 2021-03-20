@@ -169,11 +169,3 @@ else:
     with open(log_file, 'w') as f:
       f.write(exc_text)
     print('Logged current crash to {}'.format(log_file))
-
-  def capture_warning(warning_string):
-    bind_user()
-    client.captureMessage(warning_string, level='warning')
-
-  def capture_info(info_string):
-    bind_user()
-    client.captureMessage(info_string, level='info')
