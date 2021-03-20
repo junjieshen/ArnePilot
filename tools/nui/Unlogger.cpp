@@ -4,8 +4,9 @@
 #include <capnp/schema.h>
 
 // include the dynamic struct
-#include "cereal/gen/cpp/car.capnp.c++"
 #include "cereal/gen/cpp/log.capnp.c++"
+#include "cereal/gen/cpp/car.capnp.c++"
+#include "cereal/gen/cpp/legacy.capnp.c++"
 #include "cereal/services.h"
 
 #include "Unlogger.hpp"
@@ -38,7 +39,6 @@ Unlogger::Unlogger(Events *events_, QReadWriteLock* events_lock_, QMap<int, Fram
 
   for (const auto& it : services) {
     std::string name = it.name;
-
     if (allow[0].size() > 0 && !allow.contains(name.c_str())) {
       qDebug() << "not allowing" << name.c_str();
       continue;
@@ -153,14 +153,14 @@ void Unlogger::process() {
         auto ee = msg.getRoot<cereal::Event>();
         ee.setLogMonoTime(nanos_since_boot());
 
-        if (e.which() == cereal::Event::FRAME) {
-          auto fr = msg.getRoot<cereal::Event>().getFrame();
+        if (e.which() == cereal::Event::ROAD_CAMERA_STATE) {
+          auto fr = msg.getRoot<cereal::Event>().getRoadCameraState();
 
           // TODO: better way?
           auto it = eidx.find(fr.getFrameId());
           if (it != eidx.end()) {
             auto pp = *it;
-            //qDebug() << fr.getFrameId() << pp;
+            //qDebug() << fr.getRoadCameraStateId() << pp;
 
             if (frs->find(pp.first) != frs->end()) {
               auto frm = (*frs)[pp.first];
@@ -182,3 +182,4 @@ void Unlogger::process() {
     }
   }
 }
+
