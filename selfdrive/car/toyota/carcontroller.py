@@ -101,21 +101,6 @@ def create_rsa3_command(packer,OVSPVALL,OVSPVALM,OVSPVALH,NTLVLSPD,TSRSPU):
 
  return packer.make_can_msg("RSA3", 0, values)
 
-def accel_hysteresis(accel, accel_steady, enabled):
-
-  # for small accel oscillations within ACCEL_HYST_GAP, don't change the accel command
-  if not enabled:
-    # send 0 when disabled, otherwise acc faults
-    accel_steady = 0.
-  elif accel > accel_steady + ACCEL_HYST_GAP:
-    accel_steady = accel - ACCEL_HYST_GAP
-  elif accel < accel_steady - ACCEL_HYST_GAP:
-    accel_steady = accel + ACCEL_HYST_GAP
-  accel = accel_steady
-
-  return accel, accel_steady
-
-
 class CarController():
   def __init__(self, dbc_name, CP, VM):
       # dp
