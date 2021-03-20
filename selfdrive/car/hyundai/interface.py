@@ -69,6 +69,8 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.75 * 1.15
       ret.lateralTuning.pid.kiBP, ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kfBP = [[0.], [0.], [0.]]
       ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.25], [0.05]]
+      if eps_modified:
+        ret.maxSteeringAngleDeg = 1000.
     elif candidate in [CAR.ELANTRA, CAR.ELANTRA_GT_I30]:
       ret.lateralTuning.pid.kfV = [0.00006]
       ret.mass = 1275. + STD_CARGO_KG
