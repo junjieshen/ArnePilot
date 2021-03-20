@@ -4,7 +4,7 @@ from selfdrive.car import apply_toyota_steer_torque_limits, create_gas_command, 
 from selfdrive.car.toyota.toyotacan import create_steer_command, create_ui_command, \
                                            create_accel_command, create_acc_cancel_command, \
                                            create_fcw_command
-from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR, SteerLimitParams, TSS2_CAR
+from selfdrive.car.toyota.values import Ecu, CAR, STATIC_MSGS, NO_STOP_TIMER_CAR, CarControllerParams, TSS2_CAR
 from opendbc.can.packer import CANPacker
 from common.dp_common import common_controller_ctrl
 from common.op_params import opParams
