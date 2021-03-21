@@ -57,17 +57,17 @@ service_list = {
   "modelV2": Service(8077, True, 20., 20),
   "managerState": Service(8078, True, 2., 1),
 
-  "testModel": Service(8040, False, 0.),
-  "testLiveLocation": Service(8045, False, 0.),
-  "testJoystick": Service(8056, False, 0.),
+  "testModel": Service(8040, False, 0., 0.),
+  "testLiveLocation": Service(8045, False, 0., 0.),
+  "testJoystick": Service(8056, False, 0., 0.),
   # dp
-  "dragonConf": Service(8888, False, 2.),
+  "dragonConf": Service(8888, False, 2., 2.),
   "thermal": Service(8889, True, 2., 1),
   #arne182
-  "liveTrafficData": Service(8208, False, 100.),
-  "trafficModelEvent": Service(98218, False, 5.0),
-  "trafficModelRaw": Service(8219, False, 5.),
-  "latControl": Service(8210, False, 20.),
+  "liveTrafficData": Service(8208, False, 100., 100.),
+  "trafficModelEvent": Service(98218, False, 5.0, 5.),
+  "trafficModelRaw": Service(8219, False, 5., 5.),
+  "latControl": Service(8210, False, 20., 20.),
 
 }
 
