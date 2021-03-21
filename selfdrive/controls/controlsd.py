@@ -567,6 +567,9 @@ class Controls:
     controlsState.startMonoTime = int(start_time * 1e9)
     controlsState.forceDecel = bool(force_decel)
     controlsState.canErrorCounter = self.can_error_counter
+    controlsState.decelForModel = self.sm['longitudinalPlan'].longitudinalPlanSource == LongitudinalPlanSource.model
+    controlsState.mapValid = self.sm['longitudinalPlan'].mapValid
+    controlsState.vCurvature = self.sm['longitudinalPlan'].vCurvature
 
     if self.CP.lateralTuning.which() == 'pid':
       controlsState.lateralControlState.pidState = lac_log
