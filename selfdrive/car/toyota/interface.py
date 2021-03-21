@@ -82,10 +82,9 @@ class CarInterface(CarInterfaceBase):
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
       #ret.steerActuatorDelay = 0.30
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.07], [0.04]]
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.35], [0.15]]
       ret.lateralTuning.pid.kdV = [0.0]  # corolla D times gain in PI values
-      ret.lateralTuning.pid.kfV = [0.00009531750004645412]
-      ret.lateralTuning.pid.newKfTuned = True
+      ret.lateralTuning.pid.kfV = [0.00007818594]
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:
       stop_and_go = True if (candidate in CAR.RAV4H) else False
