@@ -124,9 +124,9 @@ def build():
             print("....%d" % i)
             time.sleep(1)
 #do not clean the caches
-          subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
-          shutil.rmtree("/tmp/scons_cache", ignore_errors=True)
-          shutil.rmtree("/data/scons_cache", ignore_errors=True)
+          #subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
+          #shutil.rmtree("/tmp/scons_cache", ignore_errors=True)
+          #shutil.rmtree("/data/scons_cache", ignore_errors=True)
         else:
           print("scons build failed after retry")
           process = subprocess.check_output(['git', 'pull'])
