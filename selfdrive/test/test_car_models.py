@@ -555,7 +555,7 @@ non_tested_cars = [
   TOYOTA.LEXUS_ISH,
   #VOLKSWAGEN.GENERICMQB,
   #VOLKSWAGEN.GENERICPQ,
-
+]
 if __name__ == "__main__":
 
   tested_procs = ["controlsd", "radard", "plannerd"]
