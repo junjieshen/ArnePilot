@@ -130,6 +130,7 @@ def build():
         else:
           print("scons build failed after retry")
           process = subprocess.check_output(['git', 'pull'])
+          print(process)
           os.system('reboot')
           sys.exit(1)
       else:
@@ -153,6 +154,7 @@ def build():
         with TextWindow(("openpilot failed to build (IP: %s)\n \n" % ip) + error_s) as t:
           t.wait_for_exit()
         process = subprocess.check_output(['git', 'pull'])
+        print(process)
         os.system('reboot')
         exit(1)
     else:
@@ -695,6 +697,7 @@ if __name__ == "__main__":
     with TextWindow(error) as t:
       t.wait_for_exit()
     process = subprocess.check_output(['git', 'pull'])
+    print(process)
     os.system('reboot')
     raise
 
