@@ -63,6 +63,12 @@ service_list = {
   # dp
   "dragonConf": Service(8888, False, 2.),
   "thermal": Service(8889, True, 2., 1),
+  #arne182
+  "liveTrafficData": Service(8208, false, 100.),
+  "trafficModelEvent": Service(98218, false, 5.0),
+  "trafficModelRaw": Service(8219, false, 5.),
+  "latControl": Service(8210, false, 20.),
+
 }
 
 
