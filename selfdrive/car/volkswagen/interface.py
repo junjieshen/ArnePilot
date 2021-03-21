@@ -130,6 +130,6 @@ class CarInterface(CarInterfaceBase):
                    c.hudControl.visualAlert,
                    c.hudControl.audibleAlert,
                    c.hudControl.leftLaneVisible,
-                   c.hudControl.rightLaneVisible)
+                   c.hudControl.rightLaneVisible, self.dragonconf)
     self.frame += 1
     return can_sends
