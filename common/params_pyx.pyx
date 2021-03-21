@@ -1,8 +1,8 @@
 # distutils: language = c++
 # cython: language_level = 3
-from libcpp import bool
-from libcpp.string import string
-from common.params_pxd import Params as c_Params
+from libcpp cimport bool
+from libcpp.string cimport string
+from common.params_pxd cimport Params as c_Params
 from common.dp_conf import init_params_keys
 
 import os
