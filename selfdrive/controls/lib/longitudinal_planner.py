@@ -156,18 +156,18 @@ class Planner():
     self.v_model = 0.0
     self.a_model = 0.0
 
-  def choose_solution(self, v_cruise_setpoint, enabled, lead_1, lead_2, steeringAngle):
+  def choose_solution(self, v_cruise_setpoint, enabled, lead_1, lead_2, steeringAngleDeg):
     center_x = -2.5 # Wheel base 2.5m
     lead1_check = True
     lead2_check = True
-    if steeringAngle > 100: # only at high angles
-      center_y = -1+2.5/math.tan(steeringAngle/1800.*math.pi) # Car Width 2m. Left side considered in left hand turn
-      lead1_check = math.sqrt((lead_1.dRel-center_x)**2+(lead_1.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngle/1800.*math.pi))+1. # extra meter clearance to car
-      lead2_check = math.sqrt((lead_2.dRel-center_x)**2+(lead_2.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngle/1800.*math.pi))+1.
-    elif steeringAngle < -100: # only at high angles
-      center_y = +1+2.5/math.tan(steeringAngle/1800.*math.pi) # Car Width 2m. Right side considered in right hand turn
-      lead1_check = math.sqrt((lead_1.dRel-center_x)**2+(lead_1.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngle/1800.*math.pi))+1.
-      lead2_check = math.sqrt((lead_2.dRel-center_x)**2+(lead_2.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngle/1800.*math.pi))+1.
+    if steeringAngleDeg > 100: # only at high angles
+      center_y = -1+2.5/math.tan(steeringAngleDeg/1800.*math.pi) # Car Width 2m. Left side considered in left hand turn
+      lead1_check = math.sqrt((lead_1.dRel-center_x)**2+(lead_1.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngleDeg/1800.*math.pi))+1. # extra meter clearance to car
+      lead2_check = math.sqrt((lead_2.dRel-center_x)**2+(lead_2.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngleDeg/1800.*math.pi))+1.
+    elif steeringAngleDeg < -100: # only at high angles
+      center_y = +1+2.5/math.tan(steeringAngleDeg/1800.*math.pi) # Car Width 2m. Right side considered in right hand turn
+      lead1_check = math.sqrt((lead_1.dRel-center_x)**2+(lead_1.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngleDeg/1800.*math.pi))+1.
+      lead2_check = math.sqrt((lead_2.dRel-center_x)**2+(lead_2.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngleDeg/1800.*math.pi))+1.
     if enabled:
       # dp - slow on curve from 0.7.6.1
       if self.dp_slow_on_curve:
@@ -323,13 +323,13 @@ class Planner():
 
     blinkers = sm['carState'].leftBlinker or sm['carState'].rightBlinker
     if blinkers:
-      steering_angle = sm['carState'].steeringAngle * 0.8
+      steering_angle = sm['carState'].steeringAngleDeg * 0.8
       if v_ego < 11.0:
         angle_later = 0.
       else:
         angle_later = sm['latControl'].anglelater * 0.8
     else:
-      steering_angle = sm['carState'].steeringAngle
+      steering_angle = sm['carState'].steeringAngleDeg
       if v_ego < 11.0:
         angle_later = 0.
       else:
@@ -397,7 +397,7 @@ class Planner():
     self.mpc1.update(sm['carState'], lead_1)
     self.mpc2.update(sm['carState'], lead_2)
 
-    self.choose_solution(v_cruise_setpoint, enabled, lead_1, lead_2, sm['carState'].steeringAngle)
+    self.choose_solution(v_cruise_setpoint, enabled, lead_1, lead_2, sm['carState'].steeringAngleDeg)
 
     # determine fcw
     if self.mpc1.new_lead:
