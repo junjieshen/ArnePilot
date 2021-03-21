@@ -68,7 +68,7 @@ class TestCarModel(unittest.TestCase):
           if m.src < 128:
             fingerprint[m.src][m.address] = len(m.dat)
         can_msgs.append(msg)
-      elif msg.which() == "health":
+      elif msg.which() == "deviceState":
         has_relay = pandaState.pandaState.pandaType in [log.PandaState.PandaType.blackPanda, log.PandaState.PandaType.uno, log.PandaState.PandaType.dos]
     cls.can_msgs = sorted(can_msgs, key=lambda msg: msg.logMonoTime)
 
