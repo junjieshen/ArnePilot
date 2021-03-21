@@ -80,7 +80,10 @@ class LongControl():
     self.pid.reset()
     self.v_pid = v_pid
 
-  def update(self, active, CS, v_target, v_target_future, a_target, CP, sm, hasLead, radarState, decelForTurn, longitudinalPlanSource):
+  def update(self, active, CS, v_target, v_target_future, a_target, CP, sm, long_plan, radarState):
+    hasLead = long_plan.hasLead
+    decelForTurn = long_plan.decelForTurn
+    longitudinalPlanSource = long_plan.longitudinalPlanSource
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Actuation limits
     gas_max = interp(CS.vEgo, CP.gasMaxBP, CP.gasMaxV)
