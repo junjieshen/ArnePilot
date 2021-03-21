@@ -3,30 +3,31 @@ import os
 import sys
 import time
 from typing import Any
-
 from tqdm import tqdm
 
-import cereal.messaging as messaging
-from cereal import log
+os.environ['QCOM_REPLAY'] = '1'
+
 from common.spinner import Spinner
 from common.timeout import Timeout
-from common.transformations.camera import get_view_frame_from_road_frame
+import selfdrive.manager as manager
+
+from cereal import log
+import cereal.messaging as messaging
+from tools.lib.framereader import FrameReader
+from tools.lib.logreader import LogReader
 from selfdrive.test.openpilotci import BASE_URL, get_url
 from selfdrive.test.process_replay.compare_logs import compare_logs, save_log
 from selfdrive.test.process_replay.test_processes import format_diff
 from selfdrive.version import get_git_commit
-from tools.lib.framereader import FrameReader
-from tools.lib.logreader import LogReader
+from common.transformations.camera import get_view_frame_from_road_frame
 
 TEST_ROUTE = "99c94dc769b5d96e|2019-08-03--14-19-59"
-
 
 def replace_calib(msg, calib):
   msg = msg.as_builder()
   if calib is not None:
     msg.liveCalibration.extrinsicMatrix = get_view_frame_from_road_frame(*calib, 1.22).flatten().tolist()
   return msg
-
 
 def camera_replay(lr, fr, desire=None, calib=None):
 
@@ -38,12 +39,12 @@ def camera_replay(lr, fr, desire=None, calib=None):
 
   # TODO: add dmonitoringmodeld
   print("preparing procs")
-  managed_processes['camerad'].prepare()
-  managed_processes['modeld'].prepare()
+  manager.prepare_managed_process("camerad")
+  manager.prepare_managed_process("modeld")
   try:
     print("starting procs")
-    managed_processes['camerad'].start()
-    managed_processes['modeld'].start()
+    manager.start_managed_process("camerad")
+    manager.start_managed_process("modeld")
     time.sleep(5)
     sm.update(1000)
     print("procs started")
@@ -84,9 +85,9 @@ def camera_replay(lr, fr, desire=None, calib=None):
 
   print("replay done")
   spinner.close()
-  managed_processes['modeld'].stop()
+  manager.kill_managed_process('modeld')
   time.sleep(2)
-  managed_processes['camerad'].stop()
+  manager.kill_managed_process('camerad')
   return log_msgs
 
 if __name__ == "__main__":
