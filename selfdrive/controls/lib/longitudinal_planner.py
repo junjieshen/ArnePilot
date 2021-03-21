@@ -136,7 +136,8 @@ class Planner():
     self.a_acc = 0.0
     self.v_cruise = 0.0
     self.a_cruise = 0.0
-    self.osm = True
+    self.osm =True
+    self.decel_for_turn = False
 
     self.longitudinalPlanSource = 'cruise'
     self.fcw_checker = FCWChecker()
@@ -294,7 +295,7 @@ class Planner():
     except KeyError:
       pass
 
-    decel_for_turn = bool(v_curvature_map < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
+    self.decel_for_turn = bool(v_curvature_map < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
 
     # dp
     if self.dp_profile != sm['dragonConf'].dpAccelProfile:
@@ -350,7 +351,7 @@ class Planner():
         accel_limits_turns[1] = min(accel_limits_turns[1], AWARENESS_DECEL)
         accel_limits_turns[0] = min(accel_limits_turns[0], accel_limits_turns[1])
 
-      if decel_for_turn and sm['liveMapData'].distToTurn < speed_ahead_distance and not following:
+      if self.decel_for_turn and sm['liveMapData'].distToTurn < speed_ahead_distance and not following:
         time_to_turn = max(1.0, sm['liveMapData'].distToTurn / max((v_ego + v_curvature_map)/2, 1.))
         required_decel = min(0, (v_curvature_map - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
