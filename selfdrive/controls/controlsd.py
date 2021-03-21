@@ -439,7 +439,7 @@ class Controls:
     v_acc_sol = long_plan.vStart + dt * (a_acc_sol + long_plan.aStart) / 2.0
 
     # Gas/Brake PID loop
-    actuators.gas, actuators.brake = self.LoC.update(self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP)#self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP, long_plan.hasLead, self.sm['radarState'], long_plan.decelForTurn, long_plan.longitudinalPlanSource)
+    actuators.gas, actuators.brake = self.LoC.update(self.active, CS, v_acc_sol, long_plan.vTargetFuture, a_acc_sol, self.CP, long_plan.hasLead, self.sm['radarState'], long_plan.decelForTurn, long_plan.longitudinalPlanSource)
     # Steering PID loop and lateral MPC
     actuators.steer, actuators.steeringAngleDeg, lac_log = self.LaC.update(self.active, CS, self.CP, lat_plan)
 
