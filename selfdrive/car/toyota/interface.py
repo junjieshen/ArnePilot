@@ -81,11 +81,10 @@ class CarInterface(CarInterfaceBase):
       ret.steerRatio = 13.4   # True steerRation from older prius
       tire_stiffness_factor = 0.6371   # hand-tune
       ret.mass = 3115. * CV.LB_TO_KG + STD_CARGO_KG
-      ret.steerLimitTimer = 5.0
-      ret.steerActuatorDelay = 0.48
-      ret.lateralTuning.pid.kpV = [0.036]
-      ret.lateralTuning.pid.kiV = [0.0012]
-      ret.lateralTuning.pid.kf = 0.000173263811757641 # hardcoded in latcontrol_pid, this does nothing for now
+      ret.steerActuatorDelay = 0.30
+      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.07], [0.04]]
+      ret.lateralTuning.pid.kdV = [0.0]  # corolla D times gain in PI values
+      ret.lateralTuning.pid.kf = [0.00009531750004645412]
       ret.lateralTuning.pid.newKfTuned = True
 
     elif candidate in [CAR.RAV4, CAR.RAV4H]:

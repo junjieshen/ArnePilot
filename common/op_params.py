@@ -127,8 +127,8 @@ class opParams:
                         'update_behavior': Param('auto', str, 'Can be: (\'off\', \'alert\', \'auto\') without quotes\n'
                                                               'off will never update, alert shows an alert on-screen\n'
                                                               'auto will reboot the device when an update is seen'),
-                        'lat_p': Param(.028, VT.number, live=True),
-                        'lat_i': Param(.0012, VT.number, live=True),
+                        'lat_p': Param(.21, VT.number, live=True),
+                        'lat_i': Param(.008, VT.number, live=True),
                         'lat_d': Param(0.0, VT.number, live=True),
                         'enable_indi_live': Param(False, bool, live=True),
                         'indi_inner_gain_bp': Param([18, 22, 26], [list, float, int], live=True, depends_on='enable_indi_live'),
