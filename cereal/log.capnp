@@ -607,13 +607,13 @@ struct ControlsState @0x97ff69c53601abf1 {
   angleModelBiasDEPRECATED @27 :Float32;
   gpsPlannerActive @40 :Bool;
   decelForTurn @47 :Bool;
-  decelForModelDEPRECATED @54 :Bool;
+  decelForModel @54 :Bool;
   awarenessStatusDEPRECATED @26 :Float32;
   angleSteers @13 :Float32; # dp
   vCurvature @46 :Float32;
   mapValid @49 :Bool;
   jerkFactorDEPRECATED @12 :Float32;
-  steerOverrideDEPRECATED @20 :Bool;
+  steerOverride @20 :Bool;
 }
 
 struct ModelDataV2 {
