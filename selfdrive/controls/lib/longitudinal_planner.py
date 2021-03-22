@@ -244,9 +244,9 @@ class Planner():
     else:
       speed_ahead_distance = default_brake_distance
 
-    self.v_speedlimit = NO_CURVATURE_SPEED
-    self.v_curvature_map = NO_CURVATURE_SPEED
-    self.v_speedlimit_ahead = NO_CURVATURE_SPEED
+    v_speedlimit = NO_CURVATURE_SPEED
+    v_curvature_map = NO_CURVATURE_SPEED
+    v_speedlimit_ahead = NO_CURVATURE_SPEED
     now = datetime.now()
     try:
       if sm['liveMapData'].speedLimitValid and osm and self.osm and (sm['liveMapData'].lastGps.timestamp -time.mktime(now.timetuple()) * 1000) < 10000 and (smart_speed or smart_speed_max_vego > v_ego):
