@@ -6,7 +6,7 @@ import sys
 import fcntl
 import errno
 import signal
-import shutil
+#import shutil
 import subprocess
 import textwrap
 import time
@@ -615,15 +615,15 @@ def main():
   ]
 
   # set unset params
-  try:
-    for k, v in default_params:
-      if params.get(k) is None:
-        params.put(k, v)
-  except: #UnknownKeyName:
-    subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
-    shutil.rmtree("/tmp/scons_cache", ignore_errors=True)
-    shutil.rmtree("/data/scons_cache", ignore_errors=True)
-    os.system('reboot')
+  #try:
+  for k, v in default_params:
+    if params.get(k) is None:
+      params.put(k, v)
+  #except: #UnknownKeyName:
+   # subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
+    #shutil.rmtree("/tmp/scons_cache", ignore_errors=True)
+    #shutil.rmtree("/data/scons_cache", ignore_errors=True)
+    #os.system('reboot')
 
   # parameters set by Enviroment Varables
   if os.getenv("HANDSMONITORING") is not None:
