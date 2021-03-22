@@ -22,6 +22,7 @@ from selfdrive.hardware.eon.apk import update_apks, pm_apply_packages, start_off
 from selfdrive.swaglog import cloudlog, add_logentries_handler
 from selfdrive.version import version, dirty
 from common.op_params import opParams
+from common.params_pyx import UnknownKeyName
 
 traffic_lights = opParams().get('traffic_lights')
 
@@ -614,9 +615,13 @@ def main():
   ]
 
   # set unset params
-  for k, v in default_params:
-    if params.get(k) is None:
-      params.put(k, v)
+  try:
+    for k, v in default_params:
+      if params.get(k) is None:
+        params.put(k, v)
+  except UnknownKeyName:
+    scons = subprocess.Popen(["scons"])
+    os.system('reboot')
 
   # parameters set by Enviroment Varables
   if os.getenv("HANDSMONITORING") is not None:
