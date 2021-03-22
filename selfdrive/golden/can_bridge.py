@@ -91,7 +91,7 @@ def main():
 
     dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.pandaState = {
+    dat.PandaState = {
       'ignitionLine': True,
       'PandaType': "blackPanda",
       'controlsAllowed': True
@@ -107,7 +107,7 @@ def signal_handler(sig, frame):
 
     dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.pandaState = {
+    dat.PandaState = {
       'ignitionLine': False,
       'PandaType': "greyPanda",
       'controlsAllowed': True
