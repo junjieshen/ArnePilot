@@ -6,7 +6,7 @@ import sys
 import fcntl
 import errno
 import signal
-#import shutil
+import shutil
 import subprocess
 import textwrap
 import time
@@ -22,7 +22,7 @@ from selfdrive.hardware.eon.apk import update_apks, pm_apply_packages, start_off
 from selfdrive.swaglog import cloudlog, add_logentries_handler
 from selfdrive.version import version, dirty
 from common.op_params import opParams
-from common.params_pyx import UnknownKeyName
+#from common.params_pyx import UnknownKeyName
 
 traffic_lights = opParams().get('traffic_lights')
 
@@ -619,8 +619,10 @@ def main():
     for k, v in default_params:
       if params.get(k) is None:
         params.put(k, v)
-  except UnknownKeyName:
-    scons = subprocess.Popen(["scons"])
+  except: #UnknownKeyName:
+    subprocess.check_call(["scons", "-c"], cwd=BASEDIR, env=env)
+    shutil.rmtree("/tmp/scons_cache", ignore_errors=True)
+    shutil.rmtree("/data/scons_cache", ignore_errors=True)
     os.system('reboot')
 
   # parameters set by Enviroment Varables
