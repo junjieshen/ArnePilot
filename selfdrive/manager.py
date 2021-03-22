@@ -35,7 +35,7 @@ TOTAL_SCONS_NODES = 1225
 MAX_BUILD_PROGRESS = 70
 WEBCAM = os.getenv("WEBCAM") is not None
 PREBUILT = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
-kill_updated = opParams().get('update_behavior').lower().strip() == 'off' or os.path.exists('/data/no_ota_updates')
+KILL_UPDATED = opParams().get('update_behavior').lower().strip() == 'off' or os.path.exists('/data/no_ota_updates')
 interbridged = opParams().get('interbridged')
 
 def unblock_stdout():
