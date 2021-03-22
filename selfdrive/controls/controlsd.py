@@ -467,7 +467,7 @@ class Controls:
     actuators.gas = self.interceptor.override_axis(actuators.gas, 1, 'negative', .5)  # Rescale for Toyota to maxgas=0.5
     actuators.brake = self.interceptor.override_axis(actuators.brake, 1, 'positive', 1.)
     actuators.steer = self.interceptor.override_axis(actuators.steer, 2, 'full', -1.)  # For torque based steering
-    actuators.steerAngle = self.interceptor.override_axis(actuators.steer, 2, 'full', -45.)  # For angle based steering, limit 45 deg
+    actuators.steeringAngleDeg = self.interceptor.override_axis(actuators.steer, 2, 'full', -45.)  # For angle based steering, limit 45 deg
 
     return actuators, v_acc_sol, a_acc_sol, lac_log
 
