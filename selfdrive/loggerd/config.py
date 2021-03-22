@@ -7,7 +7,7 @@ if os.environ.get('LOGGERD_ROOT', False):
 elif PC:
   ROOT = os.path.join(str(Path.home()), ".comma", "media", "0", "realdata")
 else:
-  ROOT = '/data/media/0/realdata/'
+  ROOT = '/data/media/0/ArnePilotdata/'
 
 
 CAMERA_FPS = 20
