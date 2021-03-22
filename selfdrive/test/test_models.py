@@ -16,7 +16,7 @@ from tools.lib.logreader import LogReader
 from panda.tests.safety import libpandasafety_py
 from panda.tests.safety.common import package_can_msg
 
-PandaType = log.PandaState.PandaType
+pandaType = log.PandaState.PandaType
 
 ROUTES = {v['carFingerprint']: k for k, v in routes.items() if v['enableCamera']}
 
@@ -68,7 +68,7 @@ class TestCarModel(unittest.TestCase):
           if m.src < 128:
             fingerprint[m.src][m.address] = len(m.dat)
         can_msgs.append(msg)
-      elif msg.which() == "deviceState":
+      elif msg.which() == "pandaState":
         has_relay = msg.pandaState.pandaType in [PandaType.blackPanda, PandaType.uno, PandaType.dos]
     cls.can_msgs = sorted(can_msgs, key=lambda msg: msg.logMonoTime)
 
