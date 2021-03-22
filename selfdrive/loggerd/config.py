@@ -8,7 +8,12 @@ elif PC:
   ROOT = os.path.join(str(Path.home()), ".comma", "media", "0", "realdata")
 else:
   ROOT = '/data/media/0/ArnePilotdata/'
-
+  if not os.path.exists(ROOT):
+    try:
+      os.makedirs(ROOT,mode=0o777)
+      os.chmod(ROOT,0o777)
+    except:
+      pass
 
 CAMERA_FPS = 20
 SEGMENT_LENGTH = 60
