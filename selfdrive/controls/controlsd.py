@@ -316,7 +316,7 @@ class Controls:
     if not self.enabled:
       self.mismatch_counter = 0
 
-    if not self.sm['dragonConf'].dpAtl and self.sm['pandaState'].controlsAllowed and self.enabled:
+    if not self.sm['dragonConf'].dpAtl and not self.sm['pandaState'].controlsAllowed and self.enabled:
       self.mismatch_counter += 1
 
     self.distance_traveled_now += CS.vEgo * DT_CTRL
