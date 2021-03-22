@@ -156,6 +156,9 @@ class Planner():
     self.dp_slow_on_curve = False
     self.v_model = 0.0
     self.a_model = 0.0
+    
+    # ap
+    self.v_curvature_map = NO_CURVATURE_SPEED
 
   def choose_solution(self, v_cruise_setpoint, enabled, lead_1, lead_2, steeringAngleDeg):
     center_x = -2.5 # Wheel base 2.5m
@@ -245,7 +248,7 @@ class Planner():
       speed_ahead_distance = default_brake_distance
 
     v_speedlimit = NO_CURVATURE_SPEED
-    v_curvature_map = NO_CURVATURE_SPEED
+    
     v_speedlimit_ahead = NO_CURVATURE_SPEED
     now = datetime.now()
     try:
@@ -290,12 +293,12 @@ class Planner():
           c = 3.5-13/2500*radius # 2.2 at 250m 84 kph
         else:
           c= 3.0 - 2/625 *radius # 3.0 at 15m 24 kph
-        v_curvature_map = math.sqrt(c*radius)
-        v_curvature_map = min(NO_CURVATURE_SPEED, v_curvature_map)
+        self.v_curvature_map = math.sqrt(c*radius)
+        self.v_curvature_map = min(NO_CURVATURE_SPEED, self.v_curvature_map)
     except KeyError:
       pass
 
-    self.decel_for_turn = bool(v_curvature_map < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
+    self.decel_for_turn = bool(self.v_curvature_map < min([v_cruise_setpoint, v_speedlimit, v_ego + 1.]))
 
     # dp
     if self.dp_profile != sm['dragonConf'].dpAccelProfile:
@@ -352,8 +355,8 @@ class Planner():
         accel_limits_turns[0] = min(accel_limits_turns[0], accel_limits_turns[1])
 
       if self.decel_for_turn and sm['liveMapData'].distToTurn < speed_ahead_distance and not following:
-        time_to_turn = max(1.0, sm['liveMapData'].distToTurn / max((v_ego + v_curvature_map)/2, 1.))
-        required_decel = min(0, (v_curvature_map - v_ego) / time_to_turn)
+        time_to_turn = max(1.0, sm['liveMapData'].distToTurn / max((v_ego + self.v_curvature_map)/2, 1.))
+        required_decel = min(0, (self.v_curvature_map - v_ego) / time_to_turn)
         accel_limits[0] = max(accel_limits[0], required_decel)
       if v_speedlimit_ahead < v_speedlimit and v_ego > v_speedlimit_ahead and sm['liveMapData'].speedLimitAheadDistance > 1.0 and not following:
         required_decel = min(0, (v_speedlimit_ahead*v_speedlimit_ahead - v_ego*v_ego)/(sm['liveMapData'].speedLimitAheadDistance*2))
@@ -364,7 +367,7 @@ class Planner():
         self.a_acc_start = required_decel
         v_speedlimit_ahead = v_ego
 
-      v_cruise_setpoint = min([v_cruise_setpoint, v_curvature_map, v_speedlimit, v_speedlimit_ahead])
+      v_cruise_setpoint = min([v_cruise_setpoint, self.v_curvature_map, v_speedlimit, v_speedlimit_ahead])
 
       self.v_cruise, self.a_cruise = speed_smoother(self.v_acc_start, self.a_acc_start,
                                                     v_cruise_setpoint,
@@ -444,7 +447,7 @@ class Planner():
     longitudinalPlan.hasLead = self.mpc1.prev_lead_status
     longitudinalPlan.longitudinalPlanSource = self.longitudinalPlanSource
 
-    longitudinalPlan.vCurvature = float(v_curvature_map)
+    longitudinalPlan.vCurvature = float(self.v_curvature_map)
     longitudinalPlan.decelForTurn = bool(self.decel_for_turn)
     longitudinalPlan.mapValid = True
 
