@@ -294,7 +294,7 @@ if EON:
     'rtshield',
   ]
 else:
-  car_started_processes += [
+   car_started_processes += [
     'sensord',
   ]
 
