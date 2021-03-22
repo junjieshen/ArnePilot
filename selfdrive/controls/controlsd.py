@@ -63,7 +63,7 @@ class Controls:
 
     self.sm = sm
     if self.sm is None:
-      ignore = ['ubloxRaw', 'driverCameraState', 'managerState'] if SIMULATION else ['ubloxRaw']
+      ignore = ['ubloxRaw', 'driverCameraState', 'managerState'] if SIMULATION or travis else ['ubloxRaw']
       ignore += ['driverCameraState'] if params.get('dp_driver_monitor') == b'0' else []
       self.sm = messaging.SubMaster(['deviceState', 'pandaState', 'modelV2', 'liveCalibration', 'ubloxRaw',
                                      'driverMonitoringState', 'longitudinalPlan', 'lateralPlan', 'liveLocationKalman',
