@@ -185,7 +185,7 @@ env = Environment(
     "#selfdrive/modeld",
     "#selfdrive/sensord",
     "#selfdrive/ui",
-    #"#selfdrive/trafficd",
+    "#selfdrive/trafficd",
     "#cereal",
     "#cereal/messaging",
     "#cereal/visionipc",
@@ -362,7 +362,7 @@ SConscript(['common/transformations/SConscript'])
 
 SConscript(['selfdrive/camerad/SConscript'])
 SConscript(['selfdrive/modeld/SConscript'])
-#SConscript(['selfdrive/trafficd/SConscript'])
+SConscript(['selfdrive/trafficd/SConscript'])
 
 SConscript(['selfdrive/controls/lib/cluster/SConscript'])
 SConscript(['selfdrive/controls/lib/lateral_mpc/SConscript'])
