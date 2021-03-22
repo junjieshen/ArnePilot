@@ -225,7 +225,7 @@ if EON:
   ]
 
 persistent_processes = [
-  'pandad'
+  'pandad',
   'thermald',
   'logmessaged',
   'ui',
