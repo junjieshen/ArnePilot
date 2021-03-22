@@ -242,6 +242,7 @@ class Controls:
     elif not self.sm.valid['liveParameters']:
       self.events.add(EventName.vehicleModelInvalid)
     elif not self.sm.all_alive_and_valid():
+      self.sm.print_dead_and_not_valid()
       self.events.add(EventName.commIssue)
       if not self.logged_comm_issue:
         cloudlog.error(f"commIssue - valid: {self.sm.valid} - alive: {self.sm.alive}")
