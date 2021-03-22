@@ -26,7 +26,7 @@ def main():
 
   global pm
 
-  pm = messaging.PubMaster(['can', 'health'])
+  pm = messaging.PubMaster(['can', 'pandaState'])
   gps = messaging.sub_sock('gpsLocation')
   live_params = messaging.sub_sock('liveParameters')
   #live_calibartion = messaging.sub_sock('liveCalibration')
@@ -89,11 +89,11 @@ def main():
     #  steer_angle += steer/10000.0 # torque
     #  # print(speed * 3.6, steer, throttle, brake)
 
-    dat = messaging.new_message('health')
+    dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.health = {
+    dat.pandaState = {
       'ignitionLine': True,
-      'hwType': "blackPanda",
+      'PandaType': "blackPanda",
       'controlsAllowed': True
     }
     pm.send('health', dat)
@@ -105,16 +105,16 @@ def signal_handler(sig, frame):
 
     global pm
 
-    dat = messaging.new_message('health')
+    dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.health = {
+    dat.pandaState = {
       'ignitionLine': False,
-      'hwType': "greyPanda",
+      'PandaType': "greyPanda",
       'controlsAllowed': True
     }
 
     for seq in range(10):
-      pm.send('health', dat)
+      pm.send('pandaState', dat)
       time.sleep(0.1)
 
     print ("exiting")
