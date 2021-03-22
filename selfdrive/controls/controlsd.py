@@ -235,6 +235,8 @@ class Controls:
       self.events.add(EventName.pcmDisable if self.sm['dragonConf'].dpAtl else EventName.canError)
     if (self.sm['pandaState'].safetyModel != self.CP.safetyModel and self.sm.frame > 2 / DT_CTRL) or \
       self.mismatch_counter >= 200:
+      print("self.sm['pandaState'].safetyModel = " + str(self.sm['pandaState'].safetyModel))
+      print("self.CP.safetyModel = " + str(self.CP.safetyModel))
       self.events.add(EventName.controlsMismatch)
 
     if len(self.sm['radarState'].radarErrors):
