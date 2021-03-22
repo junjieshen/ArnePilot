@@ -605,13 +605,13 @@ struct ControlsState @0x97ff69c53601abf1 {
   hudLeadDEPRECATED @14 :Int32;
   alertSoundDEPRECATED @45 :Text;
   angleModelBiasDEPRECATED @27 :Float32;
-  gpsPlannerActiveDEPRECATED @40 :Bool;
-  decelForTurnDEPRECATED @47 :Bool;
+  gpsPlannerActive @40 :Bool;
+  decelForTurn @47 :Bool;
   decelForModelDEPRECATED @54 :Bool;
   awarenessStatusDEPRECATED @26 :Float32;
   angleSteers @13 :Float32; # dp
-  vCurvatureDEPRECATED @46 :Float32;
-  mapValidDEPRECATED @49 :Bool;
+  vCurvature @46 :Float32;
+  mapValid @49 :Bool;
   jerkFactorDEPRECATED @12 :Float32;
   steerOverrideDEPRECATED @20 :Bool;
 }
@@ -748,15 +748,15 @@ struct LongitudinalPlan @0xe00b5b3eba12876c {
   longitudinalValidDEPRECATED @2 :Bool;
   dPolyDEPRECATED @1 :List(Float32);
   laneWidthDEPRECATED @11 :Float32;
-  vCurvatureDEPRECATED @21 :Float32;
-  decelForTurnDEPRECATED @22 :Bool;
-  mapValidDEPRECATED @25 :Bool;
+  vCurvature @21 :Float32;
+  decelForTurn @22 :Bool;
+  mapValid @25 :Bool;
   radarValidDEPRECATED @28 :Bool;
   radarCanErrorDEPRECATED @30 :Bool;
   commIssueDEPRECATED @31 :Bool;
   eventsDEPRECATED @13 :List(Car.CarEvent);
   gpsTrajectoryDEPRECATED @12 :GpsTrajectory;
-  gpsPlannerActiveDEPRECATED @19 :Bool;
+  gpsPlannerActive @19 :Bool;
 
   struct GpsTrajectory {
     x @0 :List(Float32);

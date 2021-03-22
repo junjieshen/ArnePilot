@@ -68,6 +68,7 @@ service_list = {
   "trafficModelEvent": Service(98218, False, 5.0, 5.),
   "trafficModelRaw": Service(8219, False, 5., 5.),
   "latControl": Service(8210, False, 20., 20.),
+  "liveMapData": Service(8065, False, 0., 0.),
 
 }
 
