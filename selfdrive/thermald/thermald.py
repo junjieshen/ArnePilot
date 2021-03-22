@@ -16,12 +16,12 @@ from common.realtime import DT_TRML, sec_since_boot
 from selfdrive.controls.lib.alertmanager import set_offroad_alert
 from selfdrive.hardware import EON, HARDWARE
 from selfdrive.loggerd.config import get_available_percent
-from selfdrive.pandad import get_expected_signature
+#from selfdrive.pandad import get_expected_signature
 from selfdrive.swaglog import cloudlog
 from selfdrive.thermald.power_monitoring import PowerMonitoring
 from selfdrive.version import get_git_branch, terms_version, training_version
 
-FW_SIGNATURE = get_expected_signature()
+#FW_SIGNATURE = get_expected_signature()
 
 ThermalStatus = log.DeviceState.ThermalStatus
 NetworkType = log.DeviceState.NetworkType
