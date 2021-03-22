@@ -89,14 +89,14 @@ def main():
     #  steer_angle += steer/10000.0 # torque
     #  # print(speed * 3.6, steer, throttle, brake)
 
-    dat = messaging.new_message('deviceState')
+    dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.PandaState = {
+    dat.pandaState = {
       'ignitionLine': True,
       'pandaType': "blackPanda",
       'controlsAllowed': True
     }
-    pm.send('health', dat)
+    pm.send('pandaState', dat)
 
     rk.keep_time()
 
@@ -105,9 +105,9 @@ def signal_handler(sig, frame):
 
     global pm
 
-    dat = messaging.new_message('deviceState')
+    dat = messaging.new_message('pandaState')
     dat.valid = True
-    dat.PandaState = {
+    dat.pandaState = {
       'ignitionLine': False,
       'pandaType': "greyPanda",
       'controlsAllowed': True
