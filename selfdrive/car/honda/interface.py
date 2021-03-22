@@ -12,7 +12,7 @@ from selfdrive.controls.lib.longitudinal_planner import _A_CRUISE_MAX_V_FOLLOWIN
 from selfdrive.car.interfaces import CarInterfaceBase
 from common.dp_common import common_interface_atl, common_interface_get_params_lqr
 from common.params import Params
-#from common.travis_checker import travis
+from common.travis_checker import travis
 
 
 A_ACC_MAX = max(_A_CRUISE_MAX_V_FOLLOWING)
@@ -131,7 +131,10 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.pid.newKfTuned = False
 
     if candidate in HONDA_BOSCH:
-      ret.safetyModel = car.CarParams.SafetyModel.hondaBoschHarness if has_relay else car.CarParams.SafetyModel.hondaBoschGiraffe
+      if travis:
+        ret.safetyModel = car.CarParams.SafetyModel.hondaBoschHarness
+      else:
+        ret.safetyModel = car.CarParams.SafetyModel.hondaBoschHarness if has_relay else car.CarParams.SafetyModel.hondaBoschGiraffe
       rdr_bus = 0 if has_relay else 2
       ret.enableCamera = bool(is_ecu_disconnected(fingerprint[rdr_bus], FINGERPRINTS, ECU_FINGERPRINT, candidate, Ecu.fwdCamera) or has_relay)
       ret.radarOffCan = True
