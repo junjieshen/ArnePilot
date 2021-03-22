@@ -248,14 +248,13 @@ if not PC:
     'tombstoned',
     'appd',
   ]
-  if not kill_updated:
-    persistent_processes.append('updated')
-
 if EON:
   persistent_processes += [
     'sensord',
   ]
-  
+  if not KILL_UPDATED:
+    persistent_processes.append('updated')
+
 if TICI:
   managed_processes["timezoned"] = "selfdrive.timezoned"
   persistent_processes += ['timezoned']
