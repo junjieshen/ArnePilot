@@ -23,7 +23,8 @@ from selfdrive.controls.lib.longitudinal_planner import LON_MPC_STEP
 from selfdrive.locationd.calibrationd import Calibration
 from selfdrive.hardware import HARDWARE
 from common.travis_checker import travis
-#import threading
+import threading
+import time
 from selfdrive.interceptor import Interceptor
 
 LDW_MIN_SPEED = 31 * CV.MPH_TO_MS
@@ -326,9 +327,11 @@ class Controls:
       if CS.steeringPressed:
         self.distance_traveled_override += CS.vEgo * DT_CTRL
     if (self.sm.frame - self.distance_traveled_frame) * DT_CTRL > 10.0 and not travis:
-      put_nonblocking("DistanceTraveled", str(round(self.distance_traveled,2)))
-      put_nonblocking("DistanceTraveledEngaged", str(round(self.distance_traveled_engaged,2)))
-      put_nonblocking("DistanceTraveledOverride", str(round(self.distance_traveled_override,2)))
+      y = threading.Thread(target=send_params, args=(str(self.distance_traveled),str(self.distance_traveled_engaged),str(self.distance_traveled_override),))
+      y.start()
+      #put_nonblocking("DistanceTraveled", str(round(self.distance_traveled,2)))
+      #put_nonblocking("DistanceTraveledEngaged", str(round(self.distance_traveled_engaged,2)))
+      #put_nonblocking("DistanceTraveledOverride", str(round(self.distance_traveled_override,2)))
       self.distance_traveled_frame = self.sm.frame
 
     return CS
@@ -641,11 +644,20 @@ class Controls:
       self.step()
       self.rk.monitor_time()
       self.prof.display()
-
+      
+def send_params(a, b, c):
+  params = Params()
+  params.put("DistanceTraveled", a)
+  time.sleep(1)
+  params.put("DistanceTraveledEngaged", b)
+  time.sleep(1)
+  params.put("DistanceTraveledOverride", c)
+  
 def main(sm=None, pm=None, logcan=None):
   controls = Controls(sm, pm, logcan)
   controls.controlsd_thread()
 
+  
 
 if __name__ == "__main__":
   main()
