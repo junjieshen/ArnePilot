@@ -307,8 +307,8 @@ class Planner():
     self.dp_slow_on_curve = sm['dragonConf'].dpSlowOnCurve
 
     # dp - slow on curve from 0.7.6.1
-    if self.dp_slow_on_curve and len(sm['model'].path.poly):
-      path = list(sm['model'].path.poly)
+    if self.dp_slow_on_curve and len(sm['modelV2'].path.poly):
+      path = list(sm['modelV2'].path.poly)
 
       # Curvature of polynomial https://en.wikipedia.org/wiki/Curvature#Curvature_of_the_graph_of_a_function
       # y = a x^3 + b x^2 + c x + d, y' = 3 a x^2 + 2 b x + c, y'' = 6 a x + 2 b
