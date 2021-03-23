@@ -9,11 +9,8 @@ elif PC:
 else:
   ROOT = '/data/media/0/ArnePilotdata/'
   if not os.path.exists(ROOT):
-    try:
-      os.makedirs(ROOT,mode=0o777)
-      os.chmod(ROOT,0o777)
-    except:
-      pass
+    os.makedirs(ROOT,mode=0o777)
+    os.chmod(ROOT,0o777)
 
 CAMERA_FPS = 20
 SEGMENT_LENGTH = 60
