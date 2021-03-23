@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-os.environ['NOCRASH'] = '1'
+os.environ['NOCRASH'] = '0'
 
 import unittest
 import matplotlib
