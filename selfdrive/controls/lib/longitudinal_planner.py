@@ -178,6 +178,7 @@ class Planner():
         #solutions = {'model': self.v_model, 'cruise': self.v_cruise}
      # else:
         #solutions = {'cruise': self.v_cruise}
+      solutions = {'cruise': self.v_cruise}
       if self.mpc1.prev_lead_status and lead1_check:
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status and lead2_check:
