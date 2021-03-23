@@ -42,7 +42,7 @@ from selfdrive.swaglog import cloudlog
 
 if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
   def capture_exception(*args, **kwargs):
-    cloudlog.error("crash", exc_info=kwargs.get('exc_info', 1))
+    pass
 
   def bind_user(**kwargs):
     pass
