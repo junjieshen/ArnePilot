@@ -153,10 +153,10 @@ class Planner():
     # dp
     self.dp_profile = DP_OFF
     # dp - slow on curve from 0.7.6.1
-    self.dp_slow_on_curve = False
-    self.v_model = 0.0
-    self.a_model = 0.0
-    
+    #self.dp_slow_on_curve = False
+    #self.v_model = 0.0
+    #self.a_model = 0.0
+
     # ap
     self.v_curvature_map = NO_CURVATURE_SPEED
 
@@ -174,10 +174,10 @@ class Planner():
       lead2_check = math.sqrt((lead_2.dRel-center_x)**2+(lead_2.yRel-center_y)**2) < abs(2.5/math.sin(steeringAngleDeg/1800.*math.pi))+1.
     if enabled:
       # dp - slow on curve from 0.7.6.1
-      if self.dp_slow_on_curve:
-        solutions = {'model': self.v_model, 'cruise': self.v_cruise}
-      else:
-        solutions = {'cruise': self.v_cruise}
+      #if self.dp_slow_on_curve:
+        #solutions = {'model': self.v_model, 'cruise': self.v_cruise}
+     # else:
+        #solutions = {'cruise': self.v_cruise}
       if self.mpc1.prev_lead_status and lead1_check:
         solutions['mpc1'] = self.mpc1.v_mpc
       if self.mpc2.prev_lead_status and lead2_check:
@@ -197,9 +197,9 @@ class Planner():
         self.v_acc = self.v_cruise
         self.a_acc = self.a_cruise
       # dp - slow on curve from 0.7.6.1
-      elif self.dp_slow_on_curve and slowest == 'model':
-        self.v_acc = self.v_model
-        self.a_acc = self.a_model
+      #elif self.dp_slow_on_curve and slowest == 'model':
+        #self.v_acc = self.v_model
+        #self.a_acc = self.a_model
 
     self.v_acc_future = v_cruise_setpoint
     if lead1_check:
@@ -248,7 +248,7 @@ class Planner():
       speed_ahead_distance = default_brake_distance
 
     v_speedlimit = NO_CURVATURE_SPEED
-    
+
     v_speedlimit_ahead = NO_CURVATURE_SPEED
     now = datetime.now()
     try:
