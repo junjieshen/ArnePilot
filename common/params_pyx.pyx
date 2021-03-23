@@ -169,10 +169,6 @@ cdef class Params:
     key = ensure_bytes(key)
     self.p.delete_db_value(key)
 
-  def get_params_path(self):
-    return self.p.get_params_path().decode("utf-8")
-
-
 def put_nonblocking(key, val, d=None):
   def f(key, val):
     params = Params(d)
