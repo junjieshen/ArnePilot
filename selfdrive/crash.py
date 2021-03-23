@@ -40,9 +40,9 @@ dirty = dirty or (subprocess.call(["git", "diff-index", "--quiet", branch, "--"]
 from selfdrive.hardware import PC
 from selfdrive.swaglog import cloudlog
 
-if False: #os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
+if os.getenv("NOLOG") or os.getenv("NOCRASH") or PC:
   def capture_exception(*args, **kwargs):
-    pass
+    cloudlog.error("crash", exc_info=kwargs.get('exc_info', 1))
 
   def bind_user(**kwargs):
     pass
